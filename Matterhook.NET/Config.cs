@@ -7,14 +7,24 @@ namespace Matterhook.NET
 {
     public class Config
     {
-        public string DiscourseUrl { get; set; }
-        public string DiscourseWebhookSecret { get; set; }
+        public DiscourseConfig DiscourseConfig { get; set; }
+        
+    }
 
-        public string MattermostWebhookUrl { get; set; }
-        public string MattermostBotChannel { get; set; }
-        public string MatthermostBotName { get; set; }
-        public string MattermostBotImage { get; set; }
-        public string[] MattermostIgnoredTopicTitles { get; set; }
-        public bool MattermostIgnorePrivateMessages { get; set; }
+    public class DiscourseConfig
+    {
+        public string Url { get; set; }
+        public string Secret { get; set; }
+        public string[] IgnoredTopicTitles { get; set; }
+        public bool IgnorePrivateMessages { get; set; }
+        public MattermostConfig MattermostConfig { get; set; }
+    }
+
+    public class MattermostConfig
+    {
+        public string WebhookUrl { get; set; }
+        public string Channel { get; set; }
+        public string Username { get; set; }
+        public string IconUrl { get; set; }
     }
 }
