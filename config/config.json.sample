@@ -22,7 +22,7 @@
         "RepoName": "pi-hole/pi-hole",
         "MattermostConfig": {
           "Channel": "adamtests",
-          "Name": "altBot"
+          "Username": "altBot"
         }
       },
       {
@@ -31,7 +31,7 @@
       {
         "RepoName": "PromoFaux/TestRepo",
         "MattermostConfig": {
-          "Name": "ADAMS REPO BOT"
+          "Username": "ADAMS REPO BOT"
         } 
       }
     ]
