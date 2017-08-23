@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  matterhook.net:
+    image: matterhook.net
+    build:
+      context: ./Matterhook.NET
+      dockerfile: Dockerfile
