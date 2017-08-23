@@ -119,11 +119,14 @@ namespace Matterhook.NET.Controllers
                 }
             }
 
+           
+
             var retVal = new MattermostMessage
             {
                 Channel = _config.MattermostConfig.Channel,
                 IconUrl = new Uri(_config.MattermostConfig.IconUrl),
                 Username = _config.MattermostConfig.Username,
+
 
                 Attachments = new List<MattermostAttachment>
                 {
@@ -140,6 +143,12 @@ namespace Matterhook.NET.Controllers
                 }
 
             };
+
+            if (p.post_number.ToString() == "1")
+               retVal.Text = "#NewTopic\n";
+
+            retVal.Text += $"#{p.topic_slug}";
+
             return retVal;
         }
 

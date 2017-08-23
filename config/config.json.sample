@@ -1,10 +1,42 @@
 {
-  "DiscourseUrl": "",
-  "DiscourseWebhookSecret": "",
-  "MattermostWebhookUrl": "",
-  "MattermostBotChannel": "",
-  "MatthermostBotName": "",
-  "MattermostBotImage": "",
-  "MattermostIgnoredTopicTitles": [ ],
-  "MattermostIgnorePrivateMessages": true
+  "DiscourseConfig": {
+    "Url": "https://discourse.server.net",
+    "Secret": "mysecretpassword1",
+    "IgnoredTopicTitles": [ "Welcome!", "Backup completed successfully" ],
+    "IgnorePrivateMessages": true,
+    "MattermostConfig": {
+      "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
+      "Channel": "atests",
+      "Username": "Adam's Test Bot",
+      "IconUrl": "https://avatars1.githubusercontent.com/u/3220138"
+    }
+  },
+  "GithubConfig": {
+    "Secret": "thisismysecret", 
+    "DefaultMattermostChannel": "atests",
+    "DefaultMattermostUsername": "Adam's Test Github Bot",
+    "DefaultMattermostIcon": "https://assets.pi-hole.net/Variants/Logo%20only/GitHubBot.png",
+    "DefaultMattermostWebhookUrl": "https://mattermostever.com/hooks/adasdasdasd",
+    "RepoList": [
+      {
+        "RepoName": "pi-hole/pi-hole",
+        "MattermostConfig": {
+          "Channel": "adamtests",
+          "Name": "altBot"
+        }
+      },
+      {
+        "RepoName": "pi-hole/testRepo"
+      },
+      {
+        "RepoName": "PromoFaux/TestRepo",
+        "MattermostConfig": {
+          "Name": "ADAMS REPO BOT"
+        } 
+      }
+    ]
+
+  }
+
+
 }

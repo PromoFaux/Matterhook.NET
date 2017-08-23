@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Matterhook.NET.Code;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
 
 namespace Matterhook.NET.Webhooks.Github
 {
@@ -20,6 +21,15 @@ namespace Matterhook.NET.Webhooks.Github
             Signature = signature;
             Delivery = delivery;
             PayloadString = payloadText;
+
+            switch (Event)
+            {
+                case "pull_request":
+                    Payload = JsonConvert.DeserializeObject<PullRequestEvent>(PayloadString);
+                    break;
+                default:
+                    throw new Exception($"Uknown Event Type: {Event}");
+            }
         }
 
         public string Event { get; set; }
@@ -28,6 +38,7 @@ namespace Matterhook.NET.Webhooks.Github
 
         public string PayloadString { get; set; }
         public string CalcSignature { get; set; }
+        public Event Payload { get; set; }
 
         
 

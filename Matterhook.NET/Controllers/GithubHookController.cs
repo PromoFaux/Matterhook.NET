@@ -24,6 +24,7 @@ namespace Matterhook.NET.Controllers
     {
 
         private readonly GithubConfig _config;
+        private MatterhookClient matterHook;
 
         public GithubHookController(IOptions<Config> config)
         {
@@ -56,12 +57,22 @@ namespace Matterhook.NET.Controllers
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha1=");
 
-                //var githubHook =  new GithubHook(Request,_config.Secret);
-
 
                 if (signature == calcSig)
                 {
                     var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
+
+                    switch (githubHook.Event)
+                    {
+                        case "pull_request":
+                            var toSend = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
+                            var test = await matterHook.PostAsync(toSend);
+                            return Ok();
+                        default:
+                            break;
+
+                    }
+
                     return Ok();
                 }
                 else
@@ -74,11 +85,102 @@ namespace Matterhook.NET.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                Console.WriteLine(e.Message);
+                return Content(e.Message);
             }
-            
-            
+        }
+
+        private MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
+        {
+            var mmc = GetMattermostDetails(payload.repository.full_name);
+            matterHook = new MatterhookClient(mmc.WebhookUrl);
+
+            var retVal = new MattermostMessage
+            {
+                Channel = mmc.Channel,
+                Username = mmc.Username,
+                IconUrl = new Uri(mmc.IconUrl),
+                
+            };
+
+            switch (payload.action)
+            {
+                case "opened":
+                    retVal.Attachments = new List<MattermostAttachment>
+                    {
+                        new MattermostAttachment
+                        {
+                            Title = payload.pull_request.title,
+                            TitleLink = new Uri(payload.pull_request.html_url),
+                            Text = payload.pull_request.body,
+                            AuthorName = payload.pull_request.user.login,
+                            AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
+                            AuthorLink = new Uri(payload.pull_request.user.url)
+
+                        }
+                    };
+
+                    retVal.Text =
+                        $"#New-Pull-Request in [{payload.repository.full_name}]({payload.repository.html_url}) ([#{payload.pull_request.number}]({payload.pull_request.html_url}))";
+                    
+                        retVal.Attachments[0].Fields = new List<MattermostField>
+                        {
+                            new MattermostField
+                            {
+                                Short = true,
+                                Title = payload.pull_request.changed_files.ToString(),
+                                Value = payload.pull_request.created_at.ToString()
+                                
+                            }
+                        };
+                    
+
+                    break;
+            }
+
+
+
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Verifies mattermost config on a per-repo basis. If it's not found, then it's posted to the default settings.
+        /// </summary>
+        /// <param name="fullName"></param>
+        /// <returns></returns>
+        private MattermostConfig GetMattermostDetails(string fullName)
+        {
+
+            var repo = _config.RepoList.FirstOrDefault(x => string.Equals(x.RepoName, fullName, StringComparison.CurrentCultureIgnoreCase));
+
+            if (repo != null)
+            {
+                return new MattermostConfig
+                {
+                    Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
+                        ? _config.DefaultMattermostChannel
+                        : repo.MattermostConfig.Channel,
+                    IconUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.IconUrl)
+                        ? _config.DefaultMattermostIcon
+                        : repo.MattermostConfig.IconUrl,
+                    Username = string.IsNullOrWhiteSpace(repo.MattermostConfig.Username)
+                        ? _config.DefaultMattermostUsername
+                        : repo.MattermostConfig.Username,
+                    WebhookUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.WebhookUrl)
+                        ? _config.DefaultMattermostWebhookUrl
+                        : repo.MattermostConfig.WebhookUrl
+                };
+            }
+
+
+            return new MattermostConfig
+            {
+                Channel = _config.DefaultMattermostChannel,
+                IconUrl = _config.DefaultMattermostIcon,
+                Username = _config.DefaultMattermostUsername,
+                WebhookUrl = _config.DefaultMattermostWebhookUrl
+            };
         }
     }
 }
