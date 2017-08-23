@@ -5,7 +5,13 @@ VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matterhook.NET", "Matterhook.NET\Matterhook.NET.csproj", "{7C7439B9-87E3-4858-94EE-0C14E2E3D5DF}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{CC96BBFE-6CBD-4A37-974F-1F6D381F4C7C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{926A9F70-8050-4CB4-BDE0-8286362388F5}"
+	ProjectSection(SolutionItems) = preProject
+		config\config.json = config\config.json
+		config\config.json.sample = config\config.json.sample
+	EndProjectSection
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2811A417-0B53-4D8C-9E96-6BB8798C7535}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +23,10 @@ Global
 		{7C7439B9-87E3-4858-94EE-0C14E2E3D5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C7439B9-87E3-4858-94EE-0C14E2E3D5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C7439B9-87E3-4858-94EE-0C14E2E3D5DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC96BBFE-6CBD-4A37-974F-1F6D381F4C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC96BBFE-6CBD-4A37-974F-1F6D381F4C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC96BBFE-6CBD-4A37-974F-1F6D381F4C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC96BBFE-6CBD-4A37-974F-1F6D381F4C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2811A417-0B53-4D8C-9E96-6BB8798C7535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2811A417-0B53-4D8C-9E96-6BB8798C7535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2811A417-0B53-4D8C-9E96-6BB8798C7535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2811A417-0B53-4D8C-9E96-6BB8798C7535}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

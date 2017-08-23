@@ -13,9 +13,13 @@ namespace Matterhook.NET
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup()
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath("/config/")
+                .AddJsonFile("config.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -24,6 +28,7 @@ namespace Matterhook.NET
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.Configure<Config>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

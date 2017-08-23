@@ -1,0 +1,10 @@
+{
+  "DiscourseUrl": "",
+  "DiscourseWebhookSecret": "",
+  "MattermostWebhookUrl": "",
+  "MattermostBotChannel": "",
+  "MatthermostBotName": "",
+  "MattermostBotImage": "",
+  "MattermostIgnoredTopicTitles": [ ],
+  "MattermostIgnorePrivateMessages": true
+}

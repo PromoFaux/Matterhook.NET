@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.0</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>cc96bbfe-6cbd-4a37-974f-1f6d381f4c7c</ProjectGuid>
+    <ProjectGuid>2811a417-0b53-4d8c-9e96-6bb8798c7535</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
     <DockerServiceUrl>http://localhost:{ServicePort}/api/values</DockerServiceUrl>
     <DockerServiceName>matterhook.net</DockerServiceName>

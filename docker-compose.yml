@@ -3,6 +3,15 @@ version: '3'
 services:
   matterhook.net:
     image: matterhook.net
+    container_name: Matterhook.NET
+    ports:
+      - 8080:80
+    restart: always
+    volumes:
+      - ./config:/config
+    environment:
+    - PUID=0
+    - PGID=0
     build:
       context: ./Matterhook.NET
       dockerfile: Dockerfile
