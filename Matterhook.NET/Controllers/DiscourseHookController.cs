@@ -2,12 +2,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using Matterhook.NET.Code;
 using Matterhook.NET.Webhooks.Discourse;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using ReverseMarkdown;
 
@@ -19,7 +23,7 @@ namespace Matterhook.NET.Controllers
     {
         private const string Sha256Prefix = "sha256=";
         private readonly DiscourseConfig _config;
-        
+
 
         public DiscourseHookController(IOptions<Config> config)
         {
@@ -33,16 +37,29 @@ namespace Matterhook.NET.Controllers
         {
             try
             {
+                string payloadText;
                 //Generate DiscourseHook object for easier reading
                 Console.WriteLine($"Discourse Hook received: {DateTime.Now}");
-                var discourseHook = new DiscourseHook(Request, _config.Secret);
-                Console.WriteLine($"Processing Incoming Hook Id: {discourseHook.EventId}");
 
-                //Did the checksums match?
-                if (discourseHook.SignatureValid)
+                Request.Headers.TryGetValue("X-Discourse-Event-Id", out StringValues eventId);
+                Request.Headers.TryGetValue("X-Discourse-Event-Type", out StringValues eventType);
+                Request.Headers.TryGetValue("X-Discourse-Event", out StringValues eventName);
+                Request.Headers.TryGetValue("X-Discourse-Event-Signature", out StringValues signature);
+
+                Console.WriteLine($"Hook Id: {eventId}");
+
+                using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
+                    payloadText = await reader.ReadToEndAsync();
+                }
 
-                    MatterhookClient matterHook = new MatterhookClient(_config.MattermostConfig.WebhookUrl);
+                var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha256=");
+
+
+                if (signature == calcSig)
+                {
+                    var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
+                    var matterHook = new MatterhookClient(_config.MattermostConfig.WebhookUrl);
 
                     switch (discourseHook.EventName)
                     {
@@ -53,23 +70,23 @@ namespace Matterhook.NET.Controllers
                         default:
                             break;
                     }
+                    return Ok();
                 }
                 else
                 {
                     Console.WriteLine("Invalid Signature!");
-                    Console.WriteLine($"Expected: {discourseHook.Signature}");
-                    Console.WriteLine($"Calculated: {discourseHook.CalcSignature}");
+                    Console.WriteLine($"Expected: {signature}");
+                    Console.WriteLine($"Calculated: {calcSig}");
                     return Unauthorized();
                 }
+        
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return Content(e.Message);
             }
-
-            return Ok();
-
+           
         }
 
         private static string ExpandDiscourseUrls(string input, string discourseUrl)
@@ -121,11 +138,11 @@ namespace Matterhook.NET.Controllers
                         AuthorIcon = new Uri($"{dUrl}{p.avatar_template.Replace("{size}","16")}")
                     }
                 }
-                
+
             };
             return retVal;
         }
 
-        
+
     }
 }

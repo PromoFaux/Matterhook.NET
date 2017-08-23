@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Matterhook.NET.Code;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
@@ -9,28 +12,24 @@ namespace Matterhook.NET.Webhooks.Github
 {
     public class GithubHook
     {
+        
 
-        /// <summary>
-        /// Turn incoming Github webhook into an object
-        /// </summary>
-        /// <param name="request">Request containing payload</param>
-        /// <param name="secret">Secret if set.</param>
-        public GithubHook(HttpRequest request, string secret = "")
+      public GithubHook(StringValues strEvent, StringValues signature, StringValues delivery, string payloadText)
         {
-
-            request.Headers.TryGetValue("X-GitHub-Event", out StringValues strEvent);
             Event = strEvent;
-
-            request.Headers.TryGetValue("X-Hub-Signature", out StringValues singature);
-            Signature = singature;
-
-            request.Headers.TryGetValue("X-GitHub-Delivery", out StringValues delivery);
+            Signature = signature;
             Delivery = delivery;
+            PayloadString = payloadText;
         }
 
         public string Event { get; set; }
         public string Signature { get; set; }
         public string Delivery { get; set; }
+
+        public string PayloadString { get; set; }
+        public string CalcSignature { get; set; }
+
         
+
     }
 }
