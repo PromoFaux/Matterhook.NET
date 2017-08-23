@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Webhooks\Github\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

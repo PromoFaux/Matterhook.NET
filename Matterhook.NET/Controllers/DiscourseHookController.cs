@@ -34,7 +34,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 //Generate DiscourseHook object for easier reading
-                Console.WriteLine($"Hook received: {DateTime.Now}");
+                Console.WriteLine($"Discourse Hook received: {DateTime.Now}");
                 var discourseHook = new DiscourseHook(Request, _config.Secret);
                 Console.WriteLine($"Processing Incoming Hook Id: {discourseHook.EventId}");
 
