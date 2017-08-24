@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Cryptography.Xml;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Matterhook.NET.Code;
-using Matterhook.NET.Webhooks.Discourse;
 using Matterhook.NET.Webhooks.Github;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json.Linq;
-using ReverseMarkdown;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -61,18 +57,41 @@ namespace Matterhook.NET.Controllers
                 if (signature == calcSig)
                 {
                     var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
-
+                   
+                    HttpResponseMessage response;
                     switch (githubHook.Event)
                     {
                         case "pull_request":
-                            var toSend = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
-                            var test = await matterHook.PostAsync(toSend);
-                            return Ok();
+                            response = await matterHook.PostAsync(GetMessagePullRequest((PullRequestEvent)githubHook.Payload));
+                            break;
+                        case "issues":
+                            response = await matterHook.PostAsync(GetMessageIssues((IssuesEvent)githubHook.Payload));
+                            break;
+                        case "issue_comment":
+                            response = await matterHook.PostAsync(GetMessageIssueComment((IssueCommentEvent)githubHook.Payload));
+                            break;
+                        case "repository":
+                            response = await matterHook.PostAsync(GetMessageRepository((RepositoryEvent)githubHook.Payload));
+                            break;
+                        case "create":
+                            response = await matterHook.PostAsync(GetMessageCreate((CreateEvent)githubHook.Payload));
+                            break;
+                        case "delete":
+                            response = await matterHook.PostAsync(GetMessageDelete((DeleteEvent)githubHook.Payload));
+                            break;
+                        case "pull_request_review_comment":
+                            response = await matterHook.PostAsync(GetMessagePullRequestReviewComment((PullRequestReviewCommentEvent)githubHook.Payload));
+                            break;
+                        case "push":
+                            break;
+                        case "commit_comment":
+                            break;
                         default:
                             break;
 
                     }
 
+                    //TODO:soemthing with response:
                     return Ok();
                 }
                 else
@@ -90,22 +109,119 @@ namespace Matterhook.NET.Controllers
             }
         }
 
-        private MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
+        private MattermostMessage GetMessagePullRequestReviewComment(PullRequestReviewCommentEvent payload)
         {
-            var mmc = GetMattermostDetails(payload.repository.full_name);
-            matterHook = new MatterhookClient(mmc.WebhookUrl);
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
 
-            var retVal = new MattermostMessage
+            switch (payload.action)
             {
-                Channel = mmc.Channel,
-                Username = mmc.Username,
-                IconUrl = new Uri(mmc.IconUrl),
-                
-            };
+                case "created":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessageDelete(DeleteEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            switch (payload.ref_type)
+            {
+                case "branch":
+                    break;
+                case "tag":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.ref_type}");
+            }
+
+            return retVal;
+        }
+
+      
+
+        private MattermostMessage GetMessageCreate(CreateEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            switch (payload.ref_type)
+            {
+                case "branch":
+                    break;
+                case "tag":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.ref_type}");
+            }
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessageRepository(RepositoryEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            switch (payload.action)
+            {
+                case "created":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            switch (payload.action)
+            {
+                case "created":
+                    break;
+                //case "edited": // This gets annoying
+                //    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessageIssues(IssuesEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
 
             switch (payload.action)
             {
                 case "opened":
+                    break;
+                case "closed":
+                    break;
+                case "labeled":
+                    break;
+                case "assigned":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            switch (payload.action)
+            {
+                case "opened":
+                    //IDE complains : Cannot convert source type 'System.Collections.Generic.List<Matterhook.Net.MattermostAttachement>' to target type 'System.Collections.Generic.List`1'
+                    //But it builds. Google reveals nothing, but it compiles and runs so....
                     retVal.Attachments = new List<MattermostAttachment>
                     {
                         new MattermostAttachment
@@ -116,33 +232,45 @@ namespace Matterhook.NET.Controllers
                             AuthorName = payload.pull_request.user.login,
                             AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
                             AuthorLink = new Uri(payload.pull_request.user.url)
-
                         }
                     };
 
                     retVal.Text =
                         $"#New-Pull-Request in [{payload.repository.full_name}]({payload.repository.html_url}) ([#{payload.pull_request.number}]({payload.pull_request.html_url}))";
-                    
-                        retVal.Attachments[0].Fields = new List<MattermostField>
-                        {
-                            new MattermostField
-                            {
-                                Short = true,
-                                Title = payload.pull_request.changed_files.ToString(),
-                                Value = payload.pull_request.created_at.ToString()
-                                
-                            }
-                        };
-                    
-
                     break;
+                case "closed":
+                    break;
+                case "assigned":
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
             }
-
-
-
 
             return retVal;
         }
+
+
+
+        private MattermostMessage BaseMessageForRepo(string repoName)
+        {
+            var mmc = GetMattermostDetails(repoName);
+            //set matterHook Client to correct webhook.
+            matterHook = new MatterhookClient(mmc.WebhookUrl);
+
+            var retVal = new MattermostMessage
+            {
+                Channel = mmc.Channel,
+                Username = mmc.Username,
+                IconUrl = new Uri(mmc.IconUrl),
+
+            };
+
+            return retVal;
+        }
+
+
+
+
 
         /// <summary>
         /// Verifies mattermost config on a per-repo basis. If it's not found, then it's posted to the default settings.
