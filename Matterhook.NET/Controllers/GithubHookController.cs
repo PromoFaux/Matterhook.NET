@@ -94,6 +94,8 @@ namespace Matterhook.NET.Controllers
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "commit_comment":
+                            message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
+                            response = await _matterHook.PostAsync(message);
                             break;
                         default:
                             break;
@@ -117,12 +119,50 @@ namespace Matterhook.NET.Controllers
             }
         }
 
-        private MattermostMessage GetMessagePush(PushEvent payload)
+        private MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
+            MattermostAttachment att = null;
+
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var commitMd = $"[`{payload.comment.commit_id.Substring(0,7)}`]({payload.comment.html_url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            switch (payload.action)
+            {
+                case "created":
+                    retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";
+                    att = new MattermostAttachment
+                    {
+                        Title = payload.comment.commit_id.Substring(0,7),
+                        TitleLink = new Uri(payload.comment.html_url),
+                        AuthorName = payload.sender.login,
+                        AuthorLink = new Uri(payload.sender.html_url),
+                        AuthorIcon = new Uri(payload.sender.avatar_url),
+                        Text = payload.comment.body
+
+                        
+                    };
+                    break;
+                default:
+                    throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            retVal.Attachments = new List<MattermostAttachment>
+            {
+                att
+            };
+
+            return retVal;
+        }
+
+        private MattermostMessage GetMessagePush(PushEvent payload)
+        {
+
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            MattermostAttachment att = null;
 
             if (!payload.deleted && !payload.forced)
-                if (!payload._ref.StartsWith("/refs/tags/"))
+                if (!payload._ref.StartsWith("refs/tags/"))
                 {
                     var multi = payload.commits.Count > 1 ? "s" : "";
                     var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
@@ -132,48 +172,60 @@ namespace Matterhook.NET.Controllers
                     retVal.Text =
                         $"{userMd} pushed {payload.commits.Count} commit{multi} to {branchMd} on {repoMd}";
 
-                    retVal.Attachments = new List<MattermostAttachment>();
 
-                    var att = new MattermostAttachment
+                    if (payload.commits.Count > 0)
                     {
-                        Fields = new List<MattermostField>()
-                    };
+                        att = new MattermostAttachment
+                        {
+                            Fields = new List<MattermostField>()
+                        };
 
-                    var tmpAdded = new MattermostField
-                    {
-                        Short = true,
-                        Title = "Added"
-                    };
-                    var tmpRemoved = new MattermostField
-                    {
-                        Short = true,
-                        Title = "Removed"
-                    };
-                    var tmpModified = new MattermostField
-                    {
-                        Short = true,
-                        Title = "Modified"
-                    };
+                        var tmpAdded = new MattermostField
+                        {
+                            Short = true,
+                            Title = "Added"
+                        };
+                        var tmpRemoved = new MattermostField
+                        {
+                            Short = true,
+                            Title = "Removed"
+                        };
+                        var tmpModified = new MattermostField
+                        {
+                            Short = true,
+                            Title = "Modified"
+                        };
 
-                    foreach (var commit in payload.commits)
-                    {
-                        att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message}\n";
-                        if (commit.added.Any())
-                            tmpAdded.Value += commit.added.Aggregate("", (current, added) => current + $"{added}\n");
-                        if (commit.removed.Any())
-                            tmpRemoved.Value +=
-                                commit.removed.Aggregate("", (current, removed) => current + $"{removed}\n");
-                        if (commit.modified.Any())
-                            tmpModified.Value +=
-                                commit.modified.Aggregate("", (current, modified) => current + $"{modified}\n");
+                        foreach (var commit in payload.commits)
+                        {
+                            att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message}\n";
+                            if (commit.added.Any())
+                                tmpAdded.Value += commit.added.Aggregate("", (current, added) => current + $"{added}\n");
+                            if (commit.removed.Any())
+                                tmpRemoved.Value +=
+                                    commit.removed.Aggregate("", (current, removed) => current + $"{removed}\n");
+                            if (commit.modified.Any())
+                                tmpModified.Value +=
+                                    commit.modified.Aggregate("", (current, modified) => current + $"{modified}\n");
+                        }
+
+                        att.Fields.Add(tmpAdded);
+                        att.Fields.Add(tmpRemoved);
+                        att.Fields.Add(tmpModified);
+
+                        retVal.Attachments.Add(att);
                     }
 
-                    att.Fields.Add(tmpAdded);
-                    att.Fields.Add(tmpRemoved);
-                    att.Fields.Add(tmpModified);
 
-                    retVal.Attachments.Add(att);
                 }
+
+            if (att != null)
+            {
+                retVal.Attachments = new List<MattermostAttachment>
+                {
+                    att
+                };
+            }
 
             return retVal;
         }
@@ -197,11 +249,16 @@ namespace Matterhook.NET.Controllers
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+
             switch (payload.ref_type)
             {
                 case "branch":
+                    retVal.Text = $"{userMd} deleted branch `{payload._ref}` from {repoMd}";
                     break;
                 case "tag":
+                    retVal.Text = $"{userMd} deleted tag `{payload._ref}` from {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.ref_type}");
@@ -215,11 +272,16 @@ namespace Matterhook.NET.Controllers
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+
             switch (payload.ref_type)
             {
                 case "branch":
+                    retVal.Text = $"{userMd} added branch `{payload._ref}` to {repoMd}";
                     break;
                 case "tag":
+                    retVal.Text = $"{userMd} added tag `{payload._ref}` to {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.ref_type}");
@@ -235,7 +297,7 @@ namespace Matterhook.NET.Controllers
             switch (payload.action)
             {
                 case "created":
-                    break;
+                    throw new Exception($"Not implemented Event action: {payload.action}");
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
             }
@@ -246,15 +308,39 @@ namespace Matterhook.NET.Controllers
         private MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
-
+            MattermostAttachment att = null;
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
                 case "created":
+                    retVal.Text = $"{userMd} commented on issue {titleMd} in {repoMd}";
+                    if (!string.IsNullOrEmpty(payload.issue.body))
+                    {
+                        att = new MattermostAttachment
+                        {
+                            Title = $"#{payload.issue.number} {payload.issue.title}",
+                            TitleLink = new Uri(payload.comment.html_url),
+                            AuthorName = payload.sender.login,
+                            AuthorLink = new Uri(payload.sender.html_url),
+                            AuthorIcon = new Uri(payload.sender.avatar_url),
+                            Text = payload.comment.body
+                        };
+                    }
                     break;
                 //case "edited": // This gets annoying
                 //    break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            if (att != null)
+            {
+                retVal.Attachments = new List<MattermostAttachment>
+                {
+                    att
+                };
             }
 
             return retVal;
@@ -299,8 +385,12 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
                     break;
                 case "assigned":
-                    var asignMd = $"[{payload.issue.assignee.id}]({payload.issue.assignee.html_url})";
+                    var asignMd = $"[{payload.issue.assignee.login}]({payload.issue.assignee.html_url})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
+                    break;
+                case "unassigned":
+                    var unasignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
@@ -319,35 +409,54 @@ namespace Matterhook.NET.Controllers
         private MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
+            MattermostAttachment att = null;
 
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var titleMd = $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
                 case "opened":
                     //IDE complains : Cannot convert source type 'System.Collections.Generic.List<Matterhook.Net.MattermostAttachement>' to target type 'System.Collections.Generic.List`1'
                     //But it builds. Google reveals nothing, but it compiles and runs so....
-                    retVal.Attachments = new List<MattermostAttachment>
+                    att = new MattermostAttachment
                     {
-                        new MattermostAttachment
-                        {
-                            Title = payload.pull_request.title,
-                            TitleLink = new Uri(payload.pull_request.html_url),
-                            Text = payload.pull_request.body,
-                            AuthorName = payload.pull_request.user.login,
-                            AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
-                            AuthorLink = new Uri(payload.pull_request.user.url)
-                        }
+                        Title = payload.pull_request.title,
+                        TitleLink = new Uri(payload.pull_request.html_url),
+                        Text = payload.pull_request.body,
+                        AuthorName = payload.pull_request.user.login,
+                        AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
+                        AuthorLink = new Uri(payload.pull_request.user.url)
                     };
-
-
                     retVal.Text =
                         $"#New-Pull-Request in [{payload.repository.full_name}]({payload.repository.html_url}) ([#{payload.pull_request.number}]({payload.pull_request.html_url}))";
+                    break;
+                case "labeled":
+                    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
+                    break;
+                case "unlabeled":
+                    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
                     break;
                 case "closed":
                     break;
                 case "assigned":
+                    var asignMd = $"[{payload.pull_request.asignee.login}]({payload.pull_request.asignee.html_url})";
+                    retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
+                    break;
+                case "unassigned":
+                    var unasignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
+            }
+
+            if (att != null)
+            {
+                retVal.Attachments = new List<MattermostAttachment>
+                {
+                    att
+                };
             }
 
             return retVal;

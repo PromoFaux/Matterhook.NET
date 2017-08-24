@@ -132,6 +132,7 @@ namespace Matterhook.NET.Webhooks.Github
         public int? additions { get; set; }
         public int? deletions { get; set; }
         public int? changed_files { get; set; }
+        public Assignee asignee { get; set; }
     }
 
 
@@ -520,7 +521,7 @@ namespace Matterhook.NET.Webhooks.Github
         public List<Label> labels { get; set; }
         public string state { get; set; }
         public bool locked { get; set; }
-        public Asignee assignee { get; set; }
+        public Assignee assignee { get; set; }
         public object milestone { get; set; }
         public int? comments { get; set; }
         [JsonConverter(typeof(UnixDateTimeConverter))]
@@ -889,7 +890,7 @@ namespace Matterhook.NET.Webhooks.Github
     }
 
 
-    public class Asignee
+    public class Assignee
     {
         public string login { get; set; }
         public int? id { get; set; }

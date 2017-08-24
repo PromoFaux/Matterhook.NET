@@ -110,6 +110,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Label label { get; set; }
         public Repository repository { get; set; }
         public Sender sender { get; set; }
+        public Assignee assignee { get; set; }
     }
 
 
@@ -120,6 +121,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Repository repository { get; set; }
         public Organization organization { get; set; }
         public Sender sender { get; set; }
+        
     }
 
     public class MarketplacePurchaseEvent : Event //marketplace_purchase
@@ -253,7 +255,10 @@ namespace Matterhook.NET.Webhooks.Github
         public Repository repository { get; set; }
         public Sender sender { get; set; }
         public Installation installation { get; set; }
+        public Label label { get; set; }
         public string requested_reviewers { get; set; }
+        public Assignee assignee { get; set; }
+
     }
 
 
