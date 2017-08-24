@@ -416,8 +416,7 @@ namespace Matterhook.NET.Controllers
             switch (payload.action)
             {
                 case "opened":
-                    //IDE complains : Cannot convert source type 'System.Collections.Generic.List<Matterhook.Net.MattermostAttachement>' to target type 'System.Collections.Generic.List`1'
-                    //But it builds. Google reveals nothing, but it compiles and runs so....
+                    retVal.Text = retVal.Text = $"{userMd} opened pull request {titleMd} in {repoMd}";
                     att = new MattermostAttachment
                     {
                         Title = payload.pull_request.title,
@@ -427,8 +426,6 @@ namespace Matterhook.NET.Controllers
                         AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
                         AuthorLink = new Uri(payload.pull_request.user.html_url)
                     };
-                    retVal.Text =
-                        $"#New-Pull-Request in [{payload.repository.full_name}]({payload.repository.html_url}) ([#{payload.pull_request.number}]({payload.pull_request.html_url}))";
                     break;
                 case "labeled":
                     retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
@@ -437,6 +434,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
                     break;
                 case "closed":
+                    retVal.Text = retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
                     break;
                 case "assigned":
                     var asignMd = $"[{payload.pull_request.asignee.login}]({payload.pull_request.asignee.html_url})";
