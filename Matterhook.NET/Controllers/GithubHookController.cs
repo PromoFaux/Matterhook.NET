@@ -92,8 +92,6 @@ namespace Matterhook.NET.Controllers
 
                     }
 
-                    //TODO:soemthing with response:
-
                     if (response != null && response.StatusCode == HttpStatusCode.OK)
                     {
                         return Ok();
