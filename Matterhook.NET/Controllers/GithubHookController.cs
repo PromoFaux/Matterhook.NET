@@ -493,26 +493,26 @@ namespace Matterhook.NET.Controllers
                 return new MattermostConfig
                 {
                     Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
-                        ? _config.DefaultMattermostChannel
+                        ? _config.MattermostConfig.Channel
                         : repo.MattermostConfig.Channel,
                     IconUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.IconUrl)
-                        ? _config.DefaultMattermostIcon
+                        ? _config.MattermostConfig.IconUrl
                         : repo.MattermostConfig.IconUrl,
                     Username = string.IsNullOrWhiteSpace(repo.MattermostConfig.Username)
-                        ? _config.DefaultMattermostUsername
+                        ? _config.MattermostConfig.Username
                         : repo.MattermostConfig.Username,
                     WebhookUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.WebhookUrl)
-                        ? _config.DefaultMattermostWebhookUrl
+                        ? _config.MattermostConfig.WebhookUrl
                         : repo.MattermostConfig.WebhookUrl
                 };
 
 
             return new MattermostConfig
             {
-                Channel = _config.DefaultMattermostChannel,
-                IconUrl = _config.DefaultMattermostIcon,
-                Username = _config.DefaultMattermostUsername,
-                WebhookUrl = _config.DefaultMattermostWebhookUrl
+                Channel = _config.MattermostConfig.Channel,
+                IconUrl = _config.MattermostConfig.IconUrl,
+                Username = _config.MattermostConfig.Username,
+                WebhookUrl = _config.MattermostConfig.WebhookUrl
             };
         }
     }

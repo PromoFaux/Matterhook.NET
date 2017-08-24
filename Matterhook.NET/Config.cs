@@ -32,10 +32,7 @@ namespace Matterhook.NET
     public class GithubConfig
     {
         public string Secret { get; set; }
-        public string DefaultMattermostChannel { get; set; }
-        public string DefaultMattermostUsername { get; set; }
-        public string DefaultMattermostIcon { get; set; }
-        public string DefaultMattermostWebhookUrl { get; set; }
+        public MattermostConfig MattermostConfig { get; set; }
 
         //TODO Look at this
         //public string DefaultSubscribedEvents { get; set; }

@@ -12,11 +12,13 @@
     }
   },
   "GithubConfig": {
-    "Secret": "thisismysecret", 
-    "DefaultMattermostChannel": "atests",
-    "DefaultMattermostUsername": "Adam's Test Github Bot",
-    "DefaultMattermostIcon": "https://assets.pi-hole.net/Variants/Logo%20only/GitHubBot.png",
-    "DefaultMattermostWebhookUrl": "https://mattermostever.com/hooks/adasdasdasd",
+    "Secret": "thisismysecret",
+    "MattermostConfig": {
+      "WebhookUrl": "https://mattermostever.com/hooks/adasdasdasd",
+      "Channel": "atests",
+      "Username": "Adam's Test Github Bot",
+      "IconUrl": "https://assets.pi-hole.net/Variants/Logo%20only/GitHubBot.png"
+    },
     "RepoList": [
       {
         "RepoName": "pi-hole/pi-hole",
