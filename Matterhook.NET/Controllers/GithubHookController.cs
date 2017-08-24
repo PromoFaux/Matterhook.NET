@@ -310,7 +310,7 @@ namespace Matterhook.NET.Controllers
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.url})";
+            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
@@ -353,7 +353,7 @@ namespace Matterhook.NET.Controllers
             MattermostAttachment att = null;
 
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.url})";
+            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
@@ -412,7 +412,7 @@ namespace Matterhook.NET.Controllers
             MattermostAttachment att = null;
 
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var titleMd = $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.url})";
+            var titleMd = $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
@@ -426,7 +426,7 @@ namespace Matterhook.NET.Controllers
                         Text = payload.pull_request.body,
                         AuthorName = payload.pull_request.user.login,
                         AuthorIcon = new Uri(payload.pull_request.user.avatar_url),
-                        AuthorLink = new Uri(payload.pull_request.user.url)
+                        AuthorLink = new Uri(payload.pull_request.user.html_url)
                     };
                     retVal.Text =
                         $"#New-Pull-Request in [{payload.repository.full_name}]({payload.repository.html_url}) ([#{payload.pull_request.number}]({payload.pull_request.html_url}))";
