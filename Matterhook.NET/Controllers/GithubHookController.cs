@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Matterhook.NET.Code;
+using Matterhook.NET.MatterhookClient;
 using Matterhook.NET.Webhooks.Github;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -20,7 +21,7 @@ namespace Matterhook.NET.Controllers
     public class GithubHookController : Controller
     {
         private readonly GithubConfig _config;
-        private MatterhookClient _matterHook;
+        private MatterhookClient.MatterhookClient _matterHook;
 
         public GithubHookController(IOptions<Config> config)
         {   
@@ -465,7 +466,7 @@ namespace Matterhook.NET.Controllers
         {
             var mmc = GetMattermostDetails(repoName);
             //set matterHook Client to correct webhook.
-            _matterHook = new MatterhookClient(mmc.WebhookUrl);
+            _matterHook = new MatterhookClient.MatterhookClient(mmc.WebhookUrl);
 
             var retVal = new MattermostMessage
             {

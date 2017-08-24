@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using ReverseMarkdown;
+using Matterhook.NET.MatterhookClient;
 
 
 namespace Matterhook.NET.Controllers
@@ -59,7 +60,7 @@ namespace Matterhook.NET.Controllers
                 if (signature == calcSig)
                 {
                     var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
-                    var matterHook = new MatterhookClient(_config.MattermostConfig.WebhookUrl);
+                    var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
 
                     switch (discourseHook.EventName)
                     {
