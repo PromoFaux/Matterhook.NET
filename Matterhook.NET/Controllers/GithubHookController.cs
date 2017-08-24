@@ -23,7 +23,7 @@ namespace Matterhook.NET.Controllers
         private MatterhookClient _matterHook;
 
         public GithubHookController(IOptions<Config> config)
-        {
+        {   
             var c = config ?? throw new ArgumentNullException(nameof(config));
             _config = c.Value.GithubConfig;
         }
@@ -200,20 +200,18 @@ namespace Matterhook.NET.Controllers
                         {
                             att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message}\n";
                             if (commit.added.Any())
-                                tmpAdded.Value += commit.added.Aggregate("", (current, added) => current + $"{added}\n");
+                                tmpAdded.Value += commit.added.Aggregate("", (current, added) => current + $"`{added}`\n");
                             if (commit.removed.Any())
                                 tmpRemoved.Value +=
-                                    commit.removed.Aggregate("", (current, removed) => current + $"{removed}\n");
+                                    commit.removed.Aggregate("", (current, removed) => current + $"`{removed}`\n");
                             if (commit.modified.Any())
                                 tmpModified.Value +=
-                                    commit.modified.Aggregate("", (current, modified) => current + $"{modified}\n");
+                                    commit.modified.Aggregate("", (current, modified) => current + $"`{modified}`\n");
                         }
 
                         att.Fields.Add(tmpAdded);
                         att.Fields.Add(tmpRemoved);
                         att.Fields.Add(tmpModified);
-
-                        retVal.Attachments.Add(att);
                     }
 
 
