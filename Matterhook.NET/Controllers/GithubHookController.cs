@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace Matterhook.NET.Controllers
                 {
                     var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
                    
-                    HttpResponseMessage response;
+                    HttpResponseMessage response = null;
                     switch (githubHook.Event)
                     {
                         case "pull_request":
@@ -92,7 +93,13 @@ namespace Matterhook.NET.Controllers
                     }
 
                     //TODO:soemthing with response:
-                    return Ok();
+
+                    if (response != null && response.StatusCode == HttpStatusCode.OK)
+                    {
+                        return Ok();
+                    }
+
+                    return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Error!");
                 }
                 else
                 {
