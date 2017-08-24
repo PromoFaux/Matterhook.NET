@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using Matterhook.NET.Code;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Matterhook.NET.Webhooks.Github
 {
@@ -21,16 +25,18 @@ namespace Matterhook.NET.Webhooks.Github
         public string assets_url { get; set; }
         public string upload_url { get; set; }
         public string html_url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string tag_name { get; set; }
         public string target_commitish { get; set; }
         public object name { get; set; }
         public bool draft { get; set; }
         public Author author { get; set; }
         public bool prerelease { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime published_at { get; set; }
-        public object[] assets { get; set; }
+        public List<object> assets { get; set; }
         public string tarball_url { get; set; }
         public string zipball_url { get; set; }
         public object body { get; set; }
@@ -43,13 +49,14 @@ namespace Matterhook.NET.Webhooks.Github
         public string tree_id { get; set; }
         public bool distinct { get; set; }
         public string message { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime timestamp { get; set; }
         public string url { get; set; }
         public Author author { get; set; }
         public Committer committer { get; set; }
-        public object[] added { get; set; }
-        public object[] removed { get; set; }
-        public string[] modified { get; set; }
+        public List<object> added { get; set; }
+        public List<object> removed { get; set; }
+        public List<string> modified { get; set; }
     }
 
     public class Author
@@ -72,31 +79,34 @@ namespace Matterhook.NET.Webhooks.Github
         public string tree_id { get; set; }
         public bool distinct { get; set; }
         public string message { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime timestamp { get; set; }
         public string url { get; set; }
         public Author author { get; set; }
         public Committer committer { get; set; }
-        public object[] added { get; set; }
-        public object[] removed { get; set; }
-        public string[] modified { get; set; }
+        public List<object> added { get; set; }
+        public List<object> removed { get; set; }
+        public List<string> modified { get; set; }
     }
 
 
     public class Pull_Request
     {
         public string url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string html_url { get; set; }
         public string diff_url { get; set; }
         public string patch_url { get; set; }
         public string issue_url { get; set; }
-        public int number { get; set; }
+        public int? number { get; set; }
         public string state { get; set; }
         public bool locked { get; set; }
         public string title { get; set; }
         public User user { get; set; }
         public string body { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public object closed_at { get; set; }
         public object merged_at { get; set; }
@@ -109,24 +119,26 @@ namespace Matterhook.NET.Webhooks.Github
         public string comments_url { get; set; }
         public string statuses_url { get; set; }
         public Head head { get; set; }
+        [JsonProperty(PropertyName = "base")]
         public Base _base { get; set; }
         public _Links _links { get; set; }
         public bool merged { get; set; }
         public object mergeable { get; set; }
         public string mergeable_state { get; set; }
         public object merged_by { get; set; }
-        public int comments { get; set; }
-        public int review_comments { get; set; }
-        public int commits { get; set; }
-        public int additions { get; set; }
-        public int deletions { get; set; }
-        public int changed_files { get; set; }
+        public int? comments { get; set; }
+        public int? review_comments { get; set; }
+        public int? commits { get; set; }
+        public int? additions { get; set; }
+        public int? deletions { get; set; }
+        public int? changed_files { get; set; }
     }
 
 
     public class Head
     {
         public string label { get; set; }
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string sha { get; set; }
         public User user { get; set; }
@@ -136,10 +148,11 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Repo
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string full_name { get; set; }
         public Owner owner { get; set; }
+        [JsonProperty(PropertyName = "private")]
         public bool _private { get; set; }
         public string html_url { get; set; }
         public string description { get; set; }
@@ -180,28 +193,31 @@ namespace Matterhook.NET.Webhooks.Github
         public string notifications_url { get; set; }
         public string labels_url { get; set; }
         public string releases_url { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime pushed_at { get; set; }
         public string git_url { get; set; }
         public string ssh_url { get; set; }
         public string clone_url { get; set; }
         public string svn_url { get; set; }
         public object homepage { get; set; }
-        public int size { get; set; }
-        public int stargazers_count { get; set; }
-        public int watchers_count { get; set; }
+        public int? size { get; set; }
+        public int? stargazers_count { get; set; }
+        public int? watchers_count { get; set; }
         public object language { get; set; }
         public bool has_issues { get; set; }
         public bool has_downloads { get; set; }
         public bool has_wiki { get; set; }
         public bool has_pages { get; set; }
-        public int forks_count { get; set; }
+        public int? forks_count { get; set; }
         public object mirror_url { get; set; }
-        public int open_issues_count { get; set; }
-        public int forks { get; set; }
-        public int open_issues { get; set; }
-        public int watchers { get; set; }
+        public int? open_issues_count { get; set; }
+        public int? forks { get; set; }
+        public int? open_issues { get; set; }
+        public int? watchers { get; set; }
         public string default_branch { get; set; }
     }
 
@@ -209,10 +225,23 @@ namespace Matterhook.NET.Webhooks.Github
     public class Base
     {
         public string label { get; set; }
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string sha { get; set; }
         public User user { get; set; }
         public Repo repo { get; set; }
+    }
+
+    public class Review
+    {
+        public int id { get; set; }
+        public User user { get; set; }
+        public string body { get; set; }
+        public DateTime submitted_at { get; set; }
+        public string state { get; set; }
+        public string html_url { get; set; }
+        public string pull_request_url { get; set; }
+        public _Links _links { get; set; }
     }
 
     public class _Links
@@ -268,14 +297,14 @@ namespace Matterhook.NET.Webhooks.Github
         public string owner_url { get; set; }
         public string url { get; set; }
         public string columns_url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string body { get; set; }
-        public int number { get; set; }
+        public int? number { get; set; }
         public string state { get; set; }
         public Creator creator { get; set; }
-        public int created_at { get; set; }
-        public int updated_at { get; set; }
+        public int? created_at { get; set; }
+        public int? updated_at { get; set; }
     }
 
 
@@ -284,10 +313,10 @@ namespace Matterhook.NET.Webhooks.Github
         public string url { get; set; }
         public string project_url { get; set; }
         public string cards_url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
-        public int created_at { get; set; }
-        public int updated_at { get; set; }
+        public int? created_at { get; set; }
+        public int? updated_at { get; set; }
     }
 
 
@@ -298,8 +327,10 @@ namespace Matterhook.NET.Webhooks.Github
         public Error error { get; set; }
         public Pusher pusher { get; set; }
         public string commit { get; set; }
-        public int duration { get; set; }
+        public int? duration { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
     }
 
@@ -311,7 +342,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Pusher
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -333,7 +364,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Blocked_User
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -354,7 +385,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Invitation
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string login { get; set; }
         public object email { get; set; }
         public string role { get; set; }
@@ -375,15 +406,17 @@ namespace Matterhook.NET.Webhooks.Github
         public string url { get; set; }
         public string html_url { get; set; }
         public string labels_url { get; set; }
-        public int id { get; set; }
-        public int number { get; set; }
+        public int? id { get; set; }
+        public int? number { get; set; }
         public string title { get; set; }
         public object description { get; set; }
         public Creator creator { get; set; }
-        public int open_issues { get; set; }
-        public int closed_issues { get; set; }
+        public int? open_issues { get; set; }
+        public int? closed_issues { get; set; }
         public string state { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public object due_on { get; set; }
         public object closed_at { get; set; }
@@ -393,7 +426,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Team
     {
         public string name { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string slug { get; set; }
         public string permission { get; set; }
         public string url { get; set; }
@@ -404,7 +437,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Member
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -427,30 +460,32 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public Account account { get; set; }
         public string billing_cycle { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime next_billing_date { get; set; }
-        public int unit_count { get; set; }
+        public int? unit_count { get; set; }
         public Plan plan { get; set; }
     }
 
 
     public class Plan
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public int monthly_price_in_cents { get; set; }
-        public int yearly_price_in_cents { get; set; }
+        public int? monthly_price_in_cents { get; set; }
+        public int? yearly_price_in_cents { get; set; }
         public string price_model { get; set; }
         public object unit_name { get; set; }
-        public string[] bullets { get; set; }
+        public List<string> bullets { get; set; }
     }
 
     public class Previous_Marketplace_Purchase
     {
         public Account account { get; set; }
         public string billing_cycle { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime next_billing_date { get; set; }
-        public int unit_count { get; set; }
+        public int? unit_count { get; set; }
         public Plan plan { get; set; }
     }
 
@@ -458,7 +493,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Organization
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string url { get; set; }
         public string repos_url { get; set; }
         public string events_url { get; set; }
@@ -478,17 +513,19 @@ namespace Matterhook.NET.Webhooks.Github
         public string comments_url { get; set; }
         public string events_url { get; set; }
         public string html_url { get; set; }
-        public int id { get; set; }
-        public int number { get; set; }
+        public int? id { get; set; }
+        public int? number { get; set; }
         public string title { get; set; }
         public User user { get; set; }
-        public Label[] labels { get; set; }
+        public List<Label> labels { get; set; }
         public string state { get; set; }
         public bool locked { get; set; }
-        public object assignee { get; set; }
+        public Asignee assignee { get; set; }
         public object milestone { get; set; }
-        public int comments { get; set; }
+        public int? comments { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public object closed_at { get; set; }
         public string body { get; set; }
@@ -506,7 +543,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Repositories_Removed
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string full_name { get; set; }
     }
@@ -514,7 +551,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Installation
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public Account account { get; set; }
         public string repository_selection { get; set; }
         public string access_tokens_url { get; set; }
@@ -524,7 +561,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Account
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -557,10 +594,11 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Forkee
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string full_name { get; set; }
         public Owner owner { get; set; }
+        [JsonProperty(PropertyName = "private")]
         public bool _private { get; set; }
         public string html_url { get; set; }
         public string description { get; set; }
@@ -601,29 +639,33 @@ namespace Matterhook.NET.Webhooks.Github
         public string notifications_url { get; set; }
         public string labels_url { get; set; }
         public string releases_url { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime pushed_at { get; set; }
         public string git_url { get; set; }
         public string ssh_url { get; set; }
         public string clone_url { get; set; }
         public string svn_url { get; set; }
         public object homepage { get; set; }
-        public int size { get; set; }
-        public int stargazers_count { get; set; }
-        public int watchers_count { get; set; }
+        public int? size { get; set; }
+        public int? stargazers_count { get; set; }
+        public int? watchers_count { get; set; }
         public object language { get; set; }
         public bool has_issues { get; set; }
         public bool has_downloads { get; set; }
         public bool has_wiki { get; set; }
         public bool has_pages { get; set; }
-        public int forks_count { get; set; }
+        public int? forks_count { get; set; }
         public object mirror_url { get; set; }
-        public int open_issues_count { get; set; }
-        public int forks { get; set; }
-        public int open_issues { get; set; }
-        public int watchers { get; set; }
+        public int? open_issues_count { get; set; }
+        public int? forks { get; set; }
+        public int? open_issues { get; set; }
+        public int? watchers { get; set; }
         public string default_branch { get; set; }
+        [JsonProperty(PropertyName = "public")]
         public bool _public { get; set; }
     }
 
@@ -631,12 +673,14 @@ namespace Matterhook.NET.Webhooks.Github
     public class Deployment_Status
     {
         public string url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string state { get; set; }
         public Creator creator { get; set; }
         public object description { get; set; }
         public object target_url { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public string deployment_url { get; set; }
         public string repository_url { get; set; }
@@ -646,15 +690,18 @@ namespace Matterhook.NET.Webhooks.Github
     public class Deployment
     {
         public string url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string sha { get; set; }
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string task { get; set; }
         public Payload payload { get; set; }
         public string environment { get; set; }
         public object description { get; set; }
         public Creator creator { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public string statuses_url { get; set; }
         public string repository_url { get; set; }
@@ -667,7 +714,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Creator
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -690,13 +737,15 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string url { get; set; }
         public string html_url { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public User user { get; set; }
         public object position { get; set; }
         public object line { get; set; }
         public object path { get; set; }
         public string commit_id { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
         public string body { get; set; }
     }
@@ -704,7 +753,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class User
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -724,10 +773,11 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Repository
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public string name { get; set; }
         public string full_name { get; set; }
         public Owner owner { get; set; }
+        [JsonProperty(PropertyName = "private")]
         public bool _private { get; set; }
         public string html_url { get; set; }
         public string description { get; set; }
@@ -768,35 +818,38 @@ namespace Matterhook.NET.Webhooks.Github
         public string notifications_url { get; set; }
         public string labels_url { get; set; }
         public string releases_url { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime created_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime updated_at { get; set; }
+        [JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime pushed_at { get; set; }
         public string git_url { get; set; }
         public string ssh_url { get; set; }
         public string clone_url { get; set; }
         public string svn_url { get; set; }
         public object homepage { get; set; }
-        public int size { get; set; }
-        public int stargazers_count { get; set; }
-        public int watchers_count { get; set; }
+        public int? size { get; set; }
+        public int? stargazers_count { get; set; }
+        public int? watchers_count { get; set; }
         public object language { get; set; }
         public bool has_issues { get; set; }
         public bool has_downloads { get; set; }
         public bool has_wiki { get; set; }
         public bool has_pages { get; set; }
-        public int forks_count { get; set; }
+        public int? forks_count { get; set; }
         public object mirror_url { get; set; }
-        public int open_issues_count { get; set; }
-        public int forks { get; set; }
-        public int open_issues { get; set; }
-        public int watchers { get; set; }
+        public int? open_issues_count { get; set; }
+        public int? forks { get; set; }
+        public int? open_issues { get; set; }
+        public int? watchers { get; set; }
         public string default_branch { get; set; }
     }
 
     public class Owner
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -817,7 +870,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class Sender
     {
         public string login { get; set; }
-        public int id { get; set; }
+        public int? id { get; set; }
         public string avatar_url { get; set; }
         public string gravatar_id { get; set; }
         public string url { get; set; }
@@ -834,4 +887,27 @@ namespace Matterhook.NET.Webhooks.Github
         public string type { get; set; }
         public bool site_admin { get; set; }
     }
+
+
+    public class Asignee
+    {
+        public string login { get; set; }
+        public int? id { get; set; }
+        public string avatar_url { get; set; }
+        public string gravatar_id { get; set; }
+        public string url { get; set; }
+        public string html_url { get; set; }
+        public string followers_url { get; set; }
+        public string following_url { get; set; }
+        public string gists_url { get; set; }
+        public string starred_url { get; set; }
+        public string subscriptions_url { get; set; }
+        public string organizations_url { get; set; }
+        public string repos_url { get; set; }
+        public string events_url { get; set; }
+        public string received_events_url { get; set; }
+        public string type { get; set; }
+        public bool site_admin { get; set; }
+    }
+
 }

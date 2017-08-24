@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Matterhook.NET.Webhooks.Github
 {
@@ -17,6 +19,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class CreateEvent : Event //create
     {
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string ref_type { get; set; }
         public string master_branch { get; set; }
@@ -29,6 +32,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class DeleteEvent : Event //delete
     {
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string ref_type { get; set; }
         public string pusher_type { get; set; }
@@ -64,7 +68,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class GollumEvent : Event //gollum (wiki)
     {
-        public Page[] pages { get; set; }
+        public List<Page> pages { get; set; }
         public Repository repository { get; set; }
         public Sender sender { get; set; }
     }
@@ -83,8 +87,8 @@ namespace Matterhook.NET.Webhooks.Github
         public string action { get; set; }
         public Installation installation { get; set; }
         public string repository_selection { get; set; }
-        public object[] repositories_added { get; set; }
-        public Repositories_Removed[] repositories_removed { get; set; }
+        public List<object> repositories_added { get; set; }
+        public List<Repositories_Removed> repositories_removed { get; set; }
         public Sender sender { get; set; }
     }
 
@@ -103,6 +107,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string action { get; set; }
         public Issue issue { get; set; }
+        public Label label { get; set; }
         public Repository repository { get; set; }
         public Sender sender { get; set; }
     }
@@ -261,17 +266,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Sender sender { get; set; }
     }
 
-    public class Review
-    {
-        public int id { get; set; }
-        public User user { get; set; }
-        public string body { get; set; }
-        public DateTime submitted_at { get; set; }
-        public string state { get; set; }
-        public string html_url { get; set; }
-        public string pull_request_url { get; set; }
-        public _Links _links { get; set; }
-    }
+
 
 
 
@@ -288,6 +283,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class PushEvent : Event //push
     {
+        [JsonProperty(PropertyName = "ref")]
         public string _ref { get; set; }
         public string before { get; set; }
         public string after { get; set; }
@@ -296,7 +292,7 @@ namespace Matterhook.NET.Webhooks.Github
         public bool forced { get; set; }
         public object base_ref { get; set; }
         public string compare { get; set; }
-        public Commit[] commits { get; set; }
+        public List<Commit> commits { get; set; }
         public Head_Commit head_commit { get; set; }
         public Repository repository { get; set; }
         public Pusher pusher { get; set; }
@@ -333,7 +329,7 @@ namespace Matterhook.NET.Webhooks.Github
         public object description { get; set; }
         public string state { get; set; }
         public Commit commit { get; set; }
-        public Branch[] branches { get; set; }
+        public List<Branch> branches { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
         public Repository repository { get; set; }

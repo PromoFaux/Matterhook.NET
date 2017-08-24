@@ -14,14 +14,14 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IIS",
-      "launchUrl": "api/values",
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "Matterhook.NET": {
       "commandName": "Project",
-      "launchUrl": "api/values",
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
