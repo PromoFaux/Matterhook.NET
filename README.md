@@ -23,6 +23,8 @@ Note: By default the service listens on port `8080`, however this can be changed
 
 ### Discourse Config:
 
+To process Discourse webhooks, point them at `http://<yourdomain>:<port>/DiscourseHook`
+
 ```JSON
 {
   "DiscourseConfig": {
@@ -50,6 +52,8 @@ Note: By default the service listens on port `8080`, however this can be changed
 There are a few more topic types that I will get around to adding eventually, for now though, I only need the `post_created` ones.
 
 ### Github Config:
+
+To process Github webhooks, point them at `http://<yourdomain>:<port>/GithubHook`
 ```
 {  
    "GithubConfig":{  
