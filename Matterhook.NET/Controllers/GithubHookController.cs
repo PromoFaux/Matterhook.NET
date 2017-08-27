@@ -24,7 +24,7 @@ namespace Matterhook.NET.Controllers
         private MatterhookClient.MatterhookClient _matterHook;
 
         public GithubHookController(IOptions<Config> config)
-        {   
+        {
             var c = config ?? throw new ArgumentNullException(nameof(config));
             _config = c.Value.GithubConfig;
         }
@@ -102,11 +102,17 @@ namespace Matterhook.NET.Controllers
                             break;
                     }
 
-                    if (response != null && response.StatusCode == HttpStatusCode.OK)
-                        return Ok();
+                    if (response == null || response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Console.WriteLine(response != null
+                            ? $"Unable to post to Mattermost {response.StatusCode}"
+                            : "Unable to post to Mattermost");
 
-                    return Content(
-                        response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Error!");
+                        return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
+                    }
+
+                    Console.WriteLine("Succesfully posted to Mattermost");
+                    return Ok();
                 }
                 Console.WriteLine("Invalid Signature!");
                 Console.WriteLine($"Expected: {signature}");
@@ -126,7 +132,7 @@ namespace Matterhook.NET.Controllers
             MattermostAttachment att = null;
 
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var commitMd = $"[`{payload.comment.commit_id.Substring(0,7)}`]({payload.comment.html_url})";
+            var commitMd = $"[`{payload.comment.commit_id.Substring(0, 7)}`]({payload.comment.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
             switch (payload.action)
             {
@@ -134,14 +140,14 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";
                     att = new MattermostAttachment
                     {
-                        Title = payload.comment.commit_id.Substring(0,7),
+                        Title = payload.comment.commit_id.Substring(0, 7),
                         TitleLink = new Uri(payload.comment.html_url),
                         AuthorName = payload.sender.login,
                         AuthorLink = new Uri(payload.sender.html_url),
                         AuthorIcon = new Uri(payload.sender.avatar_url),
                         Text = payload.comment.body
 
-                        
+
                     };
                     break;
                 default:
@@ -180,7 +186,7 @@ namespace Matterhook.NET.Controllers
 
                         if (_config.VerboseCommitMessages)
                         {
-                            
+
                         }
                         var tmpAdded = new MattermostField
                         {
@@ -220,7 +226,7 @@ namespace Matterhook.NET.Controllers
                                 tmpModified
                             };
                         }
-                        
+
                     }
 
 
