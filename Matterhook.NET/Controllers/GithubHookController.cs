@@ -176,11 +176,12 @@ namespace Matterhook.NET.Controllers
 
                     if (payload.commits.Count > 0)
                     {
-                        att = new MattermostAttachment
-                        {
-                            Fields = new List<MattermostField>()
-                        };
+                        att = new MattermostAttachment();
 
+                        if (_config.VerboseCommitMessages)
+                        {
+                            
+                        }
                         var tmpAdded = new MattermostField
                         {
                             Short = true,
@@ -210,9 +211,16 @@ namespace Matterhook.NET.Controllers
                                     commit.modified.Aggregate("", (current, modified) => current + $"`{modified}`\n");
                         }
 
-                        att.Fields.Add(tmpAdded);
-                        att.Fields.Add(tmpRemoved);
-                        att.Fields.Add(tmpModified);
+                        if (_config.VerboseCommitMessages)
+                        {
+                            att.Fields = new List<MattermostField>
+                            {
+                                tmpAdded,
+                                tmpRemoved,
+                                tmpModified
+                            };
+                        }
+                        
                     }
 
 

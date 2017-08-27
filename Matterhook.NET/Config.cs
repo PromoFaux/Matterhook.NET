@@ -33,6 +33,7 @@ namespace Matterhook.NET
     {
         public string Secret { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
+        public bool VerboseCommitMessages { get; set; }
 
         //TODO Look at this
         //public string DefaultSubscribedEvents { get; set; }
