@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Matterhook.NET.Code;
@@ -61,16 +62,26 @@ namespace Matterhook.NET.Controllers
                 {
                     var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
                     var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
-
+                    HttpResponseMessage response = null;
                     switch (discourseHook.EventName)
                     {
                         case "post_created":
-                            //todo: check status of posting to mattermost
-                            var test = await matterHook.PostAsync(PostCreated((PostPayload)discourseHook.Payload));
-                            return Ok();
+                            response = await matterHook.PostAsync(PostCreated((PostPayload)discourseHook.Payload));
+                            break;
                         default:
                             break;
                     }
+
+                    if (response == null || response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Console.WriteLine(response != null
+                            ? $"Unable to post to Mattermost {response.StatusCode}"
+                            : "Unable to post to Mattermost");
+
+                        return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
+                    }
+
+                    Console.WriteLine("Succesfully posted to Mattermost");
                     return Ok();
                 }
                 else
