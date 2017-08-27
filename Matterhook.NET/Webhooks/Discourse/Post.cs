@@ -19,7 +19,7 @@ namespace Matterhook.NET.Webhooks.Discourse
         public object avg_time { get; set; }
         public int incoming_link_count { get; set; }
         public int reads { get; set; }
-        public int score { get; set; }
+        public float score { get; set; }
         public bool yours { get; set; }
         public int topic_id { get; set; }
         public string topic_slug { get; set; }
