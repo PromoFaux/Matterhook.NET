@@ -27,8 +27,7 @@ To process Discourse webhooks, point them at `http://<yourdomain>:<port>/Discour
 
 ```JSON
 {
-  "DiscourseConfig": {
-    "Url": "https://discourse.server.net",
+  "DiscourseConfig": {    
     "Secret": "mysecretpassword1",
     "IgnoredTopicTitles": [ "Welcome!", "Backup completed successfully" ],
     "IgnorePrivateMessages": true,
@@ -40,7 +39,7 @@ To process Discourse webhooks, point them at `http://<yourdomain>:<port>/Discour
     }
 }
 ```
->note: `Url` is used to expand links from the discourse payload. They do not always include the full URL
+
 
 ![](https://i.imgur.com/CIkgbpA.png)
 
