@@ -1,6 +1,5 @@
 {
   "DiscourseConfig": {
-    "Url": "https://discourse.server.net",
     "Secret": "mysecretpassword1",
     "IgnoredTopicTitles": [ "Welcome!", "Backup completed successfully" ],
     "IgnorePrivateMessages": true,

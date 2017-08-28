@@ -25,6 +25,7 @@ namespace Matterhook.NET.Controllers
     {
         private const string Sha256Prefix = "sha256=";
         private readonly DiscourseConfig _config;
+        private string DiscourseURL;
 
 
         public DiscourseHookController(IOptions<Config> config)
@@ -47,6 +48,8 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-Discourse-Event-Type", out StringValues eventType);
                 Request.Headers.TryGetValue("X-Discourse-Event", out StringValues eventName);
                 Request.Headers.TryGetValue("X-Discourse-Event-Signature", out StringValues signature);
+                Request.Headers.TryGetValue("X-Discourse-Instance", out StringValues discourseUrl);
+                DiscourseURL = discourseUrl;
 
                 Console.WriteLine($"Hook Id: {eventId}");
 
@@ -111,7 +114,6 @@ namespace Matterhook.NET.Controllers
         private MattermostMessage PostCreated(PostPayload payload)
         {
             var p = payload.post;
-            var dUrl = _config.Url;
 
             if (_config.IgnoredTopicTitles.Contains(p.topic_title))
                 throw new Exception("Post title matches ignored titles");
@@ -123,7 +125,7 @@ namespace Matterhook.NET.Controllers
                 try
                 {
                     JObject.Parse(
-                        new WebClient().DownloadString($"{dUrl}/t/{p.topic_id}.json"));
+                        new WebClient().DownloadString($"{DiscourseURL}/t/{p.topic_id}.json"));
                 }
                 catch
                 {
@@ -146,11 +148,11 @@ namespace Matterhook.NET.Controllers
                     {
                         Fallback = "New Post in Discourse Topic",
                         Title = p.topic_title,
-                        TitleLink = new Uri($"{dUrl}/t/{p.topic_id}/{p.post_number}"),
-                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,dUrl)),
+                        TitleLink = new Uri($"{DiscourseURL}/t/{p.topic_id}/{p.post_number}"),
+                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,DiscourseURL)),
                         AuthorName = p.username,
-                        AuthorLink = new Uri($"{dUrl}/u/{p.username}"),
-                        AuthorIcon = new Uri($"{dUrl}{p.avatar_template.Replace("{size}","16")}")
+                        AuthorLink = new Uri($"{DiscourseURL}/u/{p.username}"),
+                        AuthorIcon = new Uri($"{DiscourseURL}{p.avatar_template.Replace("{size}","16")}")
                     }
                 }
 

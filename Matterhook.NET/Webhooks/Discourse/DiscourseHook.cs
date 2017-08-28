@@ -1,9 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using Matterhook.NET.Code;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 
@@ -52,8 +47,8 @@ namespace Matterhook.NET.Webhooks.Discourse
         
         public string Signature { get; set; }
 
-        private string PayloadString { get; set; }
-        public Payload Payload { get; private set; }
+        private string PayloadString { get; }
+        public Payload Payload { get; }
 
        
 

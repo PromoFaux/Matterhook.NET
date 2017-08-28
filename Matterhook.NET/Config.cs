@@ -14,7 +14,6 @@ namespace Matterhook.NET
 
     public class DiscourseConfig
     {
-        public string Url { get; set; }
         public string Secret { get; set; }
         public string[] IgnoredTopicTitles { get; set; }
         public bool IgnorePrivateMessages { get; set; }
