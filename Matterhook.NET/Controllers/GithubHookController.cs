@@ -164,24 +164,26 @@ namespace Matterhook.NET.Controllers
 
         private MattermostMessage GetMessagePush(PushEvent payload)
         {
-
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
-            MattermostAttachment att = null;
-
             if (!payload.deleted && !payload.forced)
                 if (!payload._ref.StartsWith("refs/tags/"))
                 {
-                    var multi = payload.commits.Count > 1 ? "s" : "";
-                    var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-                    var branch = payload._ref.Replace("refs/heads/", "");
-                    var branchMd = $"[{branch}]({payload.repository.html_url}/tree/{branch})";
-                    var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-                    retVal.Text =
-                        $"{userMd} pushed {payload.commits.Count} commit{multi} to {branchMd} on {repoMd}";
+
+                    var retVal = BaseMessageForRepo(payload.repository.full_name);
+                    MattermostAttachment att = null;
 
 
                     if (payload.commits.Count > 0)
                     {
+                        var multi = payload.commits.Count > 1 ? "s" : "";
+                        var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+                        var branch = payload._ref.Replace("refs/heads/", "");
+                        var branchMd = $"[{branch}]({payload.repository.html_url}/tree/{branch})";
+                        var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+                        retVal.Text =
+                            $"{userMd} pushed {payload.commits.Count} commit{multi} to {branchMd} on {repoMd}";
+
+
+
                         att = new MattermostAttachment();
 
                         if (_config.VerboseCommitMessages)
@@ -208,7 +210,8 @@ namespace Matterhook.NET.Controllers
                         {
                             att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message}\n";
                             if (commit.added.Any())
-                                tmpAdded.Value += commit.added.Aggregate("", (current, added) => current + $"`{added}`\n");
+                                tmpAdded.Value +=
+                                    commit.added.Aggregate("", (current, added) => current + $"`{added}`\n");
                             if (commit.removed.Any())
                                 tmpRemoved.Value +=
                                     commit.removed.Aggregate("", (current, removed) => current + $"`{removed}`\n");
@@ -228,19 +231,20 @@ namespace Matterhook.NET.Controllers
                         }
 
                     }
+                    else
+                    {
+                        throw new Exception("No commits in payload, no need to send message.");
+                    }
 
+                    retVal.Attachments = new List<MattermostAttachment>
+                    {
+                        att
+                    };
+
+                    return retVal;
 
                 }
-
-            if (att != null)
-            {
-                retVal.Attachments = new List<MattermostAttachment>
-                {
-                    att
-                };
-            }
-
-            return retVal;
+            throw new Exception("Unhandled Push type");
         }
 
         private MattermostMessage GetMessagePullRequestReviewComment(PullRequestReviewCommentEvent payload)
