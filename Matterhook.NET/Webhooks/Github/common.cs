@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Matterhook.NET.Code;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Matterhook.NET.Webhooks.Github
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Matterhook.NET.Webhooks.Discourse
+﻿namespace Matterhook.NET.Webhooks.Discourse
 {
     public class Actions_Summary
     {
