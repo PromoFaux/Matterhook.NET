@@ -57,6 +57,7 @@ To process Github webhooks, point them at `http://<yourdomain>:<port>/GithubHook
 {  
    "GithubConfig":{  
       "Secret":"sfsdfdsfsdfsdfsd",
+      "VerboseCommitMessages":  true, 
       "MattermostConfig": {
         "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
         "Channel": "github-gen",
