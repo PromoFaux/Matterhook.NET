@@ -3,8 +3,18 @@ Listen for Webhooks and post them to your Mattermost server!
 
 Consume webhooks from all around the web (currently just Github and Discourse) and post them to your favourite Mattermost incoming Webhook
 
-## Deployment
+[![Docker Build Status](https://img.shields.io/docker/build/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/builds/) [![Docker Stars](https://img.shields.io/docker/stars/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) [![Docker Pulls](https://img.shields.io/docker/pulls/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) 
 
+## Deployment
+Recommended - Use pre-built container:
+- Create a directory to store the bot's config file, e.g `/opt/bot/Mattermost.NET` (`${YOUR_DIRECTORY}`)
+- Create the config file in `${YOUR_DIRECTORY}`. See [Example Config file](https://github.com/PromoFaux/Matterhook.NET/blob/master/config/config.json.sample) for details, or read below.
+- `docker run -d --restart=always -v ${YOUR_DIRECTORY}/:/config/ -p ${YOUR_PORT}:80 --name Matterhook.NET promofaux/matterhook.net`
+
+`${YOUR_PORT}` is the port you wish Matterhook.NET to listen on.
+
+
+Alternative - build the container yourself:
 - Clone the repo to your machine (known from this point on as `${RepoDir}`)
 - Create the config file in: `${RepoDir}/config/` (Here you will find a `config.json.sample` to give you the framework of the file - More details below)
 - Once the config file is created, build and start the bot:
@@ -14,7 +24,7 @@ docker-compose -f docker-compose.ci.build.yml up
 docker-compose up -d --build
 ```
 
-Note: By default the service listens on port `8080`, however this can be changed by editing `docker-compose.yml`
+Note: Change the listening port in `docker-compose.yml` if you want it to listen on a port other than 8080, that's just what I use for development
 
 
 ## Configuration
