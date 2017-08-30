@@ -12,7 +12,8 @@
   },
   "GithubConfig": {
     "Secret": "thisismysecret",
-    "MattermostConfig": {
+    "VerboseCommitMessages": false,
+    "DefaultMattermostConfig": {
       "WebhookUrl": "https://mattermostever.com/hooks/adasdasdasd",
       "Channel": "atests",
       "Username": "Adam's Test Github Bot",
@@ -33,11 +34,23 @@
         "RepoName": "PromoFaux/TestRepo",
         "MattermostConfig": {
           "Username": "ADAMS REPO BOT"
-        } 
+        }
       }
     ]
 
+  },
+  "DockerHubConfig": {
+    "DefaultMattermostConfig": {
+      "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
+      "Username":  "Docker Hub"
+    },
+    "RepoList": [
+      {
+        "RepoName": "promofaux/TestRepo",
+        "MattermostConfig": {
+          "Channel": "atests"
+        }
+      }
+    ]
   }
-
-
 }

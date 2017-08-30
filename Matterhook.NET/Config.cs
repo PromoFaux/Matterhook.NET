@@ -6,6 +6,7 @@ namespace Matterhook.NET
     {
         public DiscourseConfig DiscourseConfig { get; set; }
         public GithubConfig GithubConfig { get; set; }
+        public DockerHubConfig DockerHubConfig { get; set; }
         
     }
 
@@ -28,7 +29,7 @@ namespace Matterhook.NET
     public class GithubConfig
     {
         public string Secret { get; set; }
-        public MattermostConfig MattermostConfig { get; set; }
+        public MattermostConfig DefaultMattermostConfig { get; set; }
         public bool VerboseCommitMessages { get; set; }
 
         //TODO Look at this
@@ -44,5 +45,11 @@ namespace Matterhook.NET
         //public string SubscribedEvents { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
         
+    }
+
+    public class DockerHubConfig
+    {
+        public MattermostConfig DefaultMattermostConfig { get; set; }
+        public List<RepoConfig> RepoList { get; set; }
     }
 }

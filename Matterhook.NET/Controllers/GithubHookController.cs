@@ -492,7 +492,7 @@ namespace Matterhook.NET.Controllers
             {
                 Channel = mmc.Channel,
                 Username = mmc.Username,
-                IconUrl = new Uri(mmc.IconUrl)
+                IconUrl = mmc.IconUrl != null ?new Uri(mmc.IconUrl):null
             };
 
             return retVal;
@@ -513,26 +513,26 @@ namespace Matterhook.NET.Controllers
                 return new MattermostConfig
                 {
                     Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
-                        ? _config.MattermostConfig.Channel
+                        ? _config.DefaultMattermostConfig.Channel
                         : repo.MattermostConfig.Channel,
                     IconUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.IconUrl)
-                        ? _config.MattermostConfig.IconUrl
+                        ? _config.DefaultMattermostConfig.IconUrl
                         : repo.MattermostConfig.IconUrl,
                     Username = string.IsNullOrWhiteSpace(repo.MattermostConfig.Username)
-                        ? _config.MattermostConfig.Username
+                        ? _config.DefaultMattermostConfig.Username
                         : repo.MattermostConfig.Username,
                     WebhookUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.WebhookUrl)
-                        ? _config.MattermostConfig.WebhookUrl
+                        ? _config.DefaultMattermostConfig.WebhookUrl
                         : repo.MattermostConfig.WebhookUrl
                 };
 
 
             return new MattermostConfig
             {
-                Channel = _config.MattermostConfig.Channel,
-                IconUrl = _config.MattermostConfig.IconUrl,
-                Username = _config.MattermostConfig.Username,
-                WebhookUrl = _config.MattermostConfig.WebhookUrl
+                Channel = _config.DefaultMattermostConfig.Channel,
+                IconUrl = _config.DefaultMattermostConfig.IconUrl,
+                Username = _config.DefaultMattermostConfig.Username,
+                WebhookUrl = _config.DefaultMattermostConfig.WebhookUrl
             };
         }
     }
