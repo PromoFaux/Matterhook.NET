@@ -33,7 +33,7 @@ Note: Change the listening port in `docker-compose.yml` if you want it to listen
 
 ### Discourse Config:
 
-To process Discourse webhooks, point them at `http://<yourdomain>:<port>/DiscourseHook`
+To process Discourse webhooks, point them at `http(s)://<yourdomain>:<port>/DiscourseHook`
 
 ```JSON
 {
@@ -62,13 +62,13 @@ There are a few more topic types that I will get around to adding eventually, fo
 
 ### Github Config:
 
-To process Github webhooks, point them at `http://<yourdomain>:<port>/GithubHook`
+To process Github webhooks, point them at `http(s)://<yourdomain>:<port>/GithubHook`
 ```
 {  
    "GithubConfig":{  
       "Secret":"sfsdfdsfsdfsdfsd",
       "VerboseCommitMessages":  true, 
-      "MattermostConfig": {
+      "DefaultMattermostConfig": {
         "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
         "Channel": "github-gen",
         "Username": "Gerald II - Just when you thought it was safe to go back in the water...",
@@ -133,6 +133,31 @@ A `GithubConfig` is set up with a default `MattermostConfig`. `RepoList[]` is no
 
 
 I've not managed to do everything yet, just wanted to get the bare bones in to make it a functional piece of software to use for my own use. (Typing out the classes for JSON Serializing was a long and arduous process.. and yes, I realised near the end that you can just `Edit>Paste Special>Paste JSON As Classes`!)
+
+### Docker Hub Config:
+
+To Process Docker Hub Webhooks, point them at `http(s)://<yourdomain>:<port>/DockerHubHook`
+
+```
+{  
+   "DockerHubConfig":{  
+      "DefaultMattermostConfig":{  
+         "WebhookUrl":"https://mattermostserver.com/hooks/asdasdasd",
+         "Username":"Docker Hub Bot",
+         "IconUrl":"https://avatars0.githubusercontent.com/u/5429470",
+	     "Channel": "docker-news"
+      },
+      "RepoList":[  
+         {  
+            "RepoName":"promofaux/Matterhook.NET",
+            "MattermostConfig":{  
+               "Channel":"matterhook"
+            }
+         }
+      ]
+   }
+}
+```
 
 ## Future plans /todos:
 - Process more of the Github events. Feel free to help out with that one, at this stage it's just a typing excersise!
