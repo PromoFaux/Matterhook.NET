@@ -311,10 +311,14 @@ namespace Matterhook.NET.Controllers
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
+            var repoMd = $"[{payload.repository.name}]({payload.repository.html_url})";
+            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var orgMd = $"[{payload.organization.login}]({payload.organization.url})";
             switch (payload.action)
             {
                 case "created":
-                    throw new Exception($"Not implemented Event action: {payload.action}");
+                    retVal.Text = $"{userMd} created new repository {repoMd} in {orgMd}";
+                    break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
             }
