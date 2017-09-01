@@ -14,7 +14,9 @@ namespace Matterhook.NET.Code
             string shaPrefix)
         {
             if (!signatureWithPrefix.StartsWith(shaPrefix, StringComparison.OrdinalIgnoreCase))
+            {
                 return "Invalid shaPrefix";
+            }
 
             var secretBytes = Encoding.UTF8.GetBytes(secret);
             var payloadBytes = Encoding.UTF8.GetBytes(payload);

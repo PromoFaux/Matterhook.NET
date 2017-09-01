@@ -138,24 +138,22 @@ namespace Matterhook.NET.Controllers
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var commitMd = $"[`{payload.comment.commit_id.Substring(0, 7)}`]({payload.comment.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            switch (payload.action)
+            if (payload.action == "created")
             {
-                case "created":
-                    retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";
-                    att = new MattermostAttachment
-                    {
-                        Title = payload.comment.commit_id.Substring(0, 7),
-                        TitleLink = new Uri(payload.comment.html_url),
-                        AuthorName = payload.sender.login,
-                        AuthorLink = new Uri(payload.sender.html_url),
-                        AuthorIcon = new Uri(payload.sender.avatar_url),
-                        Text = payload.comment.body
-
-
-                    };
-                    break;
-                default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";
+                att = new MattermostAttachment
+                {
+                    Title = payload.comment.commit_id.Substring(0, 7),
+                    TitleLink = new Uri(payload.comment.html_url),
+                    AuthorName = payload.sender.login,
+                    AuthorLink = new Uri(payload.sender.html_url),
+                    AuthorIcon = new Uri(payload.sender.avatar_url),
+                    Text = payload.comment.body
+                };
+            }
+            else
+            {
+                throw new Exception($"Unhandled Event action: {payload.action}");
             }
 
             retVal.Attachments = new List<MattermostAttachment>
@@ -190,11 +188,7 @@ namespace Matterhook.NET.Controllers
 
 
                         att = new MattermostAttachment();
-
-                        if (_config.VerboseCommitMessages)
-                        {
-
-                        }
+                       
                         var tmpAdded = new MattermostField
                         {
                             Short = true,
@@ -348,27 +342,25 @@ namespace Matterhook.NET.Controllers
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            switch (payload.action)
+            if (payload.action == "created")
             {
-                case "created":
-                    retVal.Text = $"{userMd} commented on issue {titleMd} in {repoMd}";
-                    if (!string.IsNullOrEmpty(payload.issue.body))
+                retVal.Text = $"{userMd} commented on issue {titleMd} in {repoMd}";
+                if (!string.IsNullOrEmpty(payload.issue.body))
+                {
+                    att = new MattermostAttachment
                     {
-                        att = new MattermostAttachment
-                        {
-                            Title = $"#{payload.issue.number} {payload.issue.title}",
-                            TitleLink = new Uri(payload.comment.html_url),
-                            AuthorName = payload.sender.login,
-                            AuthorLink = new Uri(payload.sender.html_url),
-                            AuthorIcon = new Uri(payload.sender.avatar_url),
-                            Text = payload.comment.body
-                        };
-                    }
-                    break;
-                //case "edited": // This gets annoying
-                //    break;
-                default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                        Title = $"#{payload.issue.number} {payload.issue.title}",
+                        TitleLink = new Uri(payload.comment.html_url),
+                        AuthorName = payload.sender.login,
+                        AuthorLink = new Uri(payload.sender.html_url),
+                        AuthorIcon = new Uri(payload.sender.avatar_url),
+                        Text = payload.comment.body
+                    };
+                }
+            }
+            else
+            {
+                throw new Exception($"Unhandled Event action: {payload.action}");
             }
 
             if (att != null)
@@ -453,7 +445,7 @@ namespace Matterhook.NET.Controllers
             switch (payload.action)
             {
                 case "opened":
-                    retVal.Text = retVal.Text = $"{userMd} opened pull request {titleMd} in {repoMd}";
+                    retVal.Text = $"{userMd} opened pull request {titleMd} in {repoMd}";
                     att = new MattermostAttachment
                     {
                         Title = payload.pull_request.title,
@@ -471,7 +463,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
                     break;
                 case "closed":
-                    retVal.Text = retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
+                    retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
                     break;
                 case "assigned":
                     var asignMd = $"[{payload.pull_request.asignee.login}]({payload.pull_request.asignee.html_url})";
