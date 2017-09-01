@@ -6,7 +6,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Matterhook.NET.Code
 {
-    public class Util
+    public static class Util
     {
         public static string CalculateSignature(string payload, string signatureWithPrefix, string secret,
             string shaPrefix)
@@ -60,9 +60,6 @@ namespace Matterhook.NET.Code
             if (reader.TokenType != JsonToken.Integer)
             {
                 return reader.Value;
-                throw new Exception(
-                    String.Format("Unexpected token parsing date. Expected Integer, got {0}.",
-                        reader.TokenType));
             }
 
             var ticks = (long)reader.Value;

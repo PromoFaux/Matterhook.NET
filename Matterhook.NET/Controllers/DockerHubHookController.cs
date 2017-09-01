@@ -19,8 +19,14 @@ namespace Matterhook.NET.Controllers
 
         public DockerHubHookController(IOptions<Config> config)
         {
-            var c = config ?? throw new ArgumentNullException(nameof(config));
-            _config = c.Value.DockerHubConfig;
+            try
+            {
+                _config = config.Value.DockerHubConfig;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [HttpPost("")]
@@ -36,7 +42,7 @@ namespace Matterhook.NET.Controllers
                 Console.WriteLine($"Hook Id: {requestId}");
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    payloadText = await reader.ReadToEndAsync();
+                    payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 //No fancy checksumming on this hook. I'll keep an eye on it in future...

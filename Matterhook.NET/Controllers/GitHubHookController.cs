@@ -20,13 +20,19 @@ namespace Matterhook.NET.Controllers
     [Route("[Controller]")]
     public class GithubHookController : Controller
     {
-        private readonly GithubConfig _config;
-        private MatterhookClient.MatterhookClient _matterHook;
+        private static GithubConfig _config;
+        private static MatterhookClient.MatterhookClient _matterHook;
 
         public GithubHookController(IOptions<Config> config)
         {
-            var c = config ?? throw new ArgumentNullException(nameof(config));
-            _config = c.Value.GithubConfig;
+            try
+            {
+                _config = config.Value.GithubConfig;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [HttpPost("")]
@@ -48,7 +54,7 @@ namespace Matterhook.NET.Controllers
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    payloadText = await reader.ReadToEndAsync();
+                    payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha1=");
@@ -59,7 +65,7 @@ namespace Matterhook.NET.Controllers
                     var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
 
                     HttpResponseMessage response = null;
-                    MattermostMessage message = null;
+                    MattermostMessage message;
                     switch (githubHook.Event)
                     {
                         case "pull_request":
@@ -98,8 +104,6 @@ namespace Matterhook.NET.Controllers
                             message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        default:
-                            break;
                     }
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -126,7 +130,7 @@ namespace Matterhook.NET.Controllers
             }
         }
 
-        private MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
+        private static MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
@@ -162,9 +166,10 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessagePush(PushEvent payload)
+        private static MattermostMessage GetMessagePush(PushEvent payload)
         {
             if (!payload.deleted && !payload.forced)
+            {
                 if (!payload._ref.StartsWith("refs/tags/"))
                 {
 
@@ -210,14 +215,22 @@ namespace Matterhook.NET.Controllers
                         {
                             att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message}\n";
                             if (commit.added.Any())
+                            {
                                 tmpAdded.Value +=
                                     commit.added.Aggregate("", (current, added) => current + $"`{added}`\n");
+                            }
+
                             if (commit.removed.Any())
+                            {
                                 tmpRemoved.Value +=
                                     commit.removed.Aggregate("", (current, removed) => current + $"`{removed}`\n");
+                            }
+
                             if (commit.modified.Any())
+                            {
                                 tmpModified.Value +=
                                     commit.modified.Aggregate("", (current, modified) => current + $"`{modified}`\n");
+                            }
                         }
 
                         if (_config.VerboseCommitMessages)
@@ -244,10 +257,12 @@ namespace Matterhook.NET.Controllers
                     return retVal;
 
                 }
+            }
+
             throw new Exception("Unhandled Push type");
         }
 
-        private MattermostMessage GetMessagePullRequestReviewComment(PullRequestReviewCommentEvent payload)
+        private static MattermostMessage GetMessagePullRequestReviewComment(PullRequestReviewCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
@@ -262,7 +277,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessageDelete(DeleteEvent payload)
+        private static MattermostMessage GetMessageDelete(DeleteEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
@@ -285,7 +300,7 @@ namespace Matterhook.NET.Controllers
         }
 
 
-        private MattermostMessage GetMessageCreate(CreateEvent payload)
+        private static MattermostMessage GetMessageCreate(CreateEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
@@ -307,7 +322,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessageRepository(RepositoryEvent payload)
+        private static MattermostMessage GetMessageRepository(RepositoryEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
@@ -326,7 +341,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
+        private static MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
@@ -367,7 +382,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessageIssues(IssuesEvent payload)
+        private static MattermostMessage GetMessageIssues(IssuesEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
@@ -427,7 +442,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
+        private static MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
@@ -482,7 +497,7 @@ namespace Matterhook.NET.Controllers
         }
 
 
-        private MattermostMessage BaseMessageForRepo(string repoName)
+        private static MattermostMessage BaseMessageForRepo(string repoName)
         {
             var mmc = GetMattermostDetails(repoName);
             //set matterHook Client to correct webhook.
@@ -504,7 +519,7 @@ namespace Matterhook.NET.Controllers
         /// </summary>
         /// <param name="fullName"></param>
         /// <returns></returns>
-        private MattermostConfig GetMattermostDetails(string fullName)
+        private static MattermostConfig GetMattermostDetails(string fullName)
         {
             var repo = _config.RepoList.FirstOrDefault(
                 x => string.Equals(x.RepoName, fullName, StringComparison.CurrentCultureIgnoreCase));

@@ -26,23 +26,18 @@ namespace Matterhook.NET
         public string IconUrl { get; set; }
     }
 
+    //TODO: Look at configuring subscribed events
     public class GithubConfig
     {
         public string Secret { get; set; }
         public MattermostConfig DefaultMattermostConfig { get; set; }
         public bool VerboseCommitMessages { get; set; }
-
-        //TODO Look at this
-        //public string DefaultSubscribedEvents { get; set; }
-
         public List<RepoConfig> RepoList { get; set; }
     }
 
     public class RepoConfig
     {
         public string RepoName { get; set; }
-        //Todo: Look at this
-        //public string SubscribedEvents { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
         
     }
