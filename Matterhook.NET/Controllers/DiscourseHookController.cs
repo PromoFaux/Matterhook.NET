@@ -23,16 +23,20 @@ namespace Matterhook.NET.Controllers
     [Route("[Controller]")]
     public class DiscourseHookController : Controller
     {
-        private const string Sha256Prefix = "sha256=";
         private readonly DiscourseConfig _config;
-        private string DiscourseURL;
+        private string _discourseUrl;
 
 
         public DiscourseHookController(IOptions<Config> config)
         {
-            var c = config ?? throw new ArgumentNullException(nameof(config));
-            _config = c.Value.DiscourseConfig;
-
+            try
+            {
+                _config = config.Value.DiscourseConfig;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [HttpPost("")]
@@ -49,13 +53,13 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-Discourse-Event", out StringValues eventName);
                 Request.Headers.TryGetValue("X-Discourse-Event-Signature", out StringValues signature);
                 Request.Headers.TryGetValue("X-Discourse-Instance", out StringValues discourseUrl);
-                DiscourseURL = discourseUrl;
+                _discourseUrl = discourseUrl;
 
                 Console.WriteLine($"Hook Id: {eventId}");
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    payloadText = await reader.ReadToEndAsync();
+                    payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha256=");
@@ -66,13 +70,10 @@ namespace Matterhook.NET.Controllers
                     var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
                     var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
                     HttpResponseMessage response = null;
-                    switch (discourseHook.EventName)
+
+                    if (discourseHook.EventName == "post_created")
                     {
-                        case "post_created":
-                            response = await matterHook.PostAsync(PostCreated((PostPayload)discourseHook.Payload));
-                            break;
-                        default:
-                            break;
+                        response = await matterHook.PostAsync(PostCreated((PostPayload) discourseHook.Payload));
                     }
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -116,7 +117,9 @@ namespace Matterhook.NET.Controllers
             var p = payload.post;
 
             if (_config.IgnoredTopicTitles.Contains(p.topic_title))
+            {
                 throw new Exception("Post title matches ignored titles");
+            }
 
             if (_config.IgnorePrivateMessages)
             {
@@ -125,7 +128,7 @@ namespace Matterhook.NET.Controllers
                 try
                 {
                     JObject.Parse(
-                        new WebClient().DownloadString($"{DiscourseURL}/t/{p.topic_id}.json"));
+                        new WebClient().DownloadString($"{_discourseUrl}/t/{p.topic_id}.json"));
                 }
                 catch
                 {
@@ -148,18 +151,20 @@ namespace Matterhook.NET.Controllers
                     {
                         Fallback = "New Post in Discourse Topic",
                         Title = p.topic_title,
-                        TitleLink = new Uri($"{DiscourseURL}/t/{p.topic_id}/{p.post_number}"),
-                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,DiscourseURL)),
+                        TitleLink = new Uri($"{_discourseUrl}/t/{p.topic_id}/{p.post_number}"),
+                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,_discourseUrl)),
                         AuthorName = p.username,
-                        AuthorLink = new Uri($"{DiscourseURL}/u/{p.username}"),
-                        AuthorIcon = new Uri($"{DiscourseURL}{p.avatar_template.Replace("{size}","16")}")
+                        AuthorLink = new Uri($"{_discourseUrl}/u/{p.username}"),
+                        AuthorIcon = new Uri($"{_discourseUrl}{p.avatar_template.Replace("{size}","16")}")
                     }
                 }
 
             };
 
             if (p.post_number.ToString() == "1")
-               retVal.Text = "#NewTopic\n";
+            {
+                retVal.Text = "#NewTopic\n";
+            }
 
             retVal.Text += $"#{p.topic_slug}";
 

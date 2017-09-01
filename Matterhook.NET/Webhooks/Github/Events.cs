@@ -13,7 +13,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string action { get; set; }
         public Comment comment { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -26,7 +26,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string description { get; set; }
         public string pusher_type { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -37,7 +37,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string ref_type { get; set; }
         public string pusher_type { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -45,7 +45,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public Deployment deployment { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -54,7 +54,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Deployment_Status deployment_status { get; set; }
         public Deployment deployment { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -62,7 +62,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public Forkee forkee { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -70,7 +70,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public List<Page> pages { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -78,7 +78,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string action { get; set; }
         public Installation installation { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -89,7 +89,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string repository_selection { get; set; }
         public List<object> repositories_added { get; set; }
         public List<Repositories_Removed> repositories_removed { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -99,7 +99,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Issue issue { get; set; }
         public Comment comment { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -109,8 +109,8 @@ namespace Matterhook.NET.Webhooks.Github
         public Issue issue { get; set; }
         public Label label { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
-        public Assignee assignee { get; set; }
+        public User sender { get; set; }
+        public User assignee { get; set; }
     }
 
 
@@ -120,7 +120,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Label label { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
         
     }
 
@@ -130,7 +130,7 @@ namespace Matterhook.NET.Webhooks.Github
         public DateTime effective_date { get; set; }
         public Marketplace_Purchase marketplace_purchase { get; set; }
         public Previous_Marketplace_Purchase previous_marketplace_purchase { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -138,9 +138,9 @@ namespace Matterhook.NET.Webhooks.Github
     public class MemberEvent : Event //member
     {
         public string action { get; set; }
-        public Member member { get; set; }
+        public User member { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -148,8 +148,8 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string action { get; set; }
         public string scope { get; set; }
-        public Member member { get; set; }
-        public Sender sender { get; set; }
+        public User member { get; set; }
+        public User sender { get; set; }
         public Team team { get; set; }
         public Organization organization { get; set; }
     }
@@ -163,7 +163,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Milestone milestone { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
     public class OrganizationEvent : Event //organization
@@ -172,16 +172,16 @@ namespace Matterhook.NET.Webhooks.Github
         public Invitation invitation { get; set; }
         public Membership membership { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
     public class OrgBlockEvent : Event //org_block
     {
         public string action { get; set; }
-        public Blocked_User blocked_user { get; set; }
+        public User blocked_user { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -190,7 +190,7 @@ namespace Matterhook.NET.Webhooks.Github
         public int id { get; set; }
         public Build build { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -201,7 +201,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Project_Card project_card { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
     public class Project_Card
@@ -211,7 +211,7 @@ namespace Matterhook.NET.Webhooks.Github
         public int column_id { get; set; }
         public int id { get; set; }
         public object note { get; set; }
-        public Creator creator { get; set; }
+        public User creator { get; set; }
         public int created_at { get; set; }
         public int updated_at { get; set; }
         public string content_url { get; set; }
@@ -224,7 +224,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Project_Column project_column { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -234,7 +234,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Project project { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -242,7 +242,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class PublicEvent : Event //public
     {
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -253,11 +253,11 @@ namespace Matterhook.NET.Webhooks.Github
         public int number { get; set; }
         public Pull_Request pull_request { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
         public Installation installation { get; set; }
         public Label label { get; set; }
         public string requested_reviewers { get; set; }
-        public Assignee assignee { get; set; }
+        public User assignee { get; set; }
 
     }
 
@@ -268,7 +268,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Review review { get; set; }
         public Pull_Request pull_request { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -281,7 +281,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Comment comment { get; set; }
         public Pull_Request pull_request { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -298,10 +298,10 @@ namespace Matterhook.NET.Webhooks.Github
         public object base_ref { get; set; }
         public string compare { get; set; }
         public List<Commit> commits { get; set; }
-        public Head_Commit head_commit { get; set; }
+        public Commit head_commit { get; set; }
         public Repository repository { get; set; }
-        public Pusher pusher { get; set; }
-        public Sender sender { get; set; }
+        public User pusher { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -311,7 +311,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string action { get; set; }
         public Release release { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
     public class RepositoryEvent : Event //repository
@@ -319,7 +319,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string action { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -338,7 +338,7 @@ namespace Matterhook.NET.Webhooks.Github
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -347,7 +347,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string action { get; set; }
         public Team team { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -357,7 +357,7 @@ namespace Matterhook.NET.Webhooks.Github
         public Team team { get; set; }
         public Repository repository { get; set; }
         public Organization organization { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 
@@ -366,7 +366,7 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string action { get; set; }
         public Repository repository { get; set; }
-        public Sender sender { get; set; }
+        public User sender { get; set; }
     }
 
 

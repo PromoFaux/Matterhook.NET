@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Matterhook.NET.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -19,8 +20,14 @@ namespace Matterhook.NET.Controllers
 
         public DockerHubHookController(IOptions<Config> config)
         {
-            var c = config ?? throw new ArgumentNullException(nameof(config));
-            _config = c.Value.DockerHubConfig;
+            try
+            {
+                _config = config.Value.DockerHubConfig;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [HttpPost("")]
@@ -36,13 +43,14 @@ namespace Matterhook.NET.Controllers
                 Console.WriteLine($"Hook Id: {requestId}");
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    payloadText = await reader.ReadToEndAsync();
+                    payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 //No fancy checksumming on this hook. I'll keep an eye on it in future...
                 var dockerhubHook = new DockerHubHook(payloadText);
-
-                var mm = GetMattermostDetails(dockerhubHook.payload.Repository.RepoName);
+                
+                var mm = Util.GetMattermostDetails(_config.DefaultMattermostConfig,
+                    _config.RepoList, dockerhubHook.payload.Repository.RepoName);
 
                 var matterHook = new MatterhookClient.MatterhookClient(mm.WebhookUrl);
 
@@ -70,45 +78,6 @@ namespace Matterhook.NET.Controllers
                 Console.WriteLine(e);
                 return Content(e.Message);
             }
-        }
-
-
-        //TODO:Break this out to the Util Class to avoid duplication
-        /// <summary>
-        ///     Verifies mattermost config on a per-repo basis. If it's not found, then it's posted to the default settings.
-        /// </summary>
-        /// <param name="fullName"></param>
-        /// <returns></returns>
-        private MattermostConfig GetMattermostDetails(string fullName)
-        {
-            var repo = _config.RepoList.FirstOrDefault(
-                x => string.Equals(x.RepoName, fullName, StringComparison.CurrentCultureIgnoreCase));
-
-            if (repo != null)
-                return new MattermostConfig
-                {
-                    Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
-                        ? _config.DefaultMattermostConfig.Channel
-                        : repo.MattermostConfig.Channel,
-                    IconUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.IconUrl)
-                        ? _config.DefaultMattermostConfig.IconUrl
-                        : repo.MattermostConfig.IconUrl,
-                    Username = string.IsNullOrWhiteSpace(repo.MattermostConfig.Username)
-                        ? _config.DefaultMattermostConfig.Username
-                        : repo.MattermostConfig.Username,
-                    WebhookUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.WebhookUrl)
-                        ? _config.DefaultMattermostConfig.WebhookUrl
-                        : repo.MattermostConfig.WebhookUrl
-                };
-
-
-            return new MattermostConfig
-            {
-                Channel = _config.DefaultMattermostConfig.Channel,
-                IconUrl = _config.DefaultMattermostConfig.IconUrl,
-                Username = _config.DefaultMattermostConfig.Username,
-                WebhookUrl = _config.DefaultMattermostConfig.WebhookUrl
-            };
         }
     }
 
