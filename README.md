@@ -159,7 +159,7 @@ To Process Docker Hub Webhooks, point them at `http(s)://<yourdomain>:<port>/Doc
 }
 ```
 
-![](https://i.imgur.com/ohghaSy.png)
+![](https://i.imgur.com/BMkHD9h.png)
 
 ## Future plans /todos:
 - Process more of the Github events. Feel free to help out with that one, at this stage it's just a typing excersise!
