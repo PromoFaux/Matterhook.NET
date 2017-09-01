@@ -66,6 +66,7 @@ namespace Matterhook.NET.Code
                 x => string.Equals(x.RepoName, fullName, StringComparison.CurrentCultureIgnoreCase));
 
             if (repo != null)
+            {
                 return new MattermostConfig
                 {
                     Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
@@ -81,6 +82,7 @@ namespace Matterhook.NET.Code
                         ? defaultMattermostConfig.WebhookUrl
                         : repo.MattermostConfig.WebhookUrl
                 };
+            }
 
             return defaultMattermostConfig;
         }
