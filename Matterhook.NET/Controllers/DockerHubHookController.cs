@@ -54,7 +54,7 @@ namespace Matterhook.NET.Controllers
                     Channel = mm.Channel,
                     Username = mm.Username,
                     IconUrl = mm.IconUrl != null ? new Uri(mm.IconUrl) : null,
-                    Text = $"#### New image built and pushed to {repoMd}:{dockerhubHook.payload.PushData.Tag}"
+                    Text = $"New image built and pushed to {repoMd} with tag `{dockerhubHook.payload.PushData.Tag}`"
                 };
 
                 var response = await matterHook.PostAsync(msg);
