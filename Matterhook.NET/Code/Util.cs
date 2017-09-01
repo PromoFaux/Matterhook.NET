@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
@@ -48,6 +50,39 @@ namespace Matterhook.NET.Code
             }
 
             return builder.ToString();
+        }
+
+
+        /// <summary>
+        ///     Verifies mattermost config on a per-repo basis. If it's not found, then it's posted to the default settings.
+        /// </summary>
+        /// <param name="repoList"></param>
+        /// <param name="fullName"></param>
+        /// <param name="defaultMattermostConfig"></param>
+        /// <returns></returns>
+        public static MattermostConfig GetMattermostDetails(MattermostConfig defaultMattermostConfig, List<RepoConfig> repoList, string fullName)
+        {
+            var repo = repoList.FirstOrDefault(
+                x => string.Equals(x.RepoName, fullName, StringComparison.CurrentCultureIgnoreCase));
+
+            if (repo != null)
+                return new MattermostConfig
+                {
+                    Channel = string.IsNullOrWhiteSpace(repo.MattermostConfig.Channel)
+                        ? defaultMattermostConfig.Channel
+                        : repo.MattermostConfig.Channel,
+                    IconUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.IconUrl)
+                        ? defaultMattermostConfig.IconUrl
+                        : repo.MattermostConfig.IconUrl,
+                    Username = string.IsNullOrWhiteSpace(repo.MattermostConfig.Username)
+                        ? defaultMattermostConfig.Username
+                        : repo.MattermostConfig.Username,
+                    WebhookUrl = string.IsNullOrWhiteSpace(repo.MattermostConfig.WebhookUrl)
+                        ? defaultMattermostConfig.WebhookUrl
+                        : repo.MattermostConfig.WebhookUrl
+                };
+
+            return defaultMattermostConfig;
         }
 
     }
