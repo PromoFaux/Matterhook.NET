@@ -35,6 +35,9 @@ namespace Matterhook.NET.Webhooks.Github
                 case "delete":
                     Payload = JsonConvert.DeserializeObject<DeleteEvent>(PayloadString);
                     break;
+                case "pull_request_review":
+                    Payload = JsonConvert.DeserializeObject<PullRequestReviewEvent>(PayloadString);
+                    break;
                 case "pull_request_review_comment":
                     Payload = JsonConvert.DeserializeObject<PullRequestReviewCommentEvent>(PayloadString);
                     break;
