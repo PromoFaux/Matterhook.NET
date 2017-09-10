@@ -123,6 +123,7 @@ namespace Matterhook.NET.Controllers
                     }
                     if (message != null) stuffToLog.Add(message.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
+                    Util.LogList(stuffToLog);
                     return Ok();
                 }
                 stuffToLog.Add("Invalid Signature!");
