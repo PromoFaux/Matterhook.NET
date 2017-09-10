@@ -42,11 +42,12 @@ namespace Matterhook.NET.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Receive()
         {
+            var stuffToLog = new List<string>();
             try
             {
                 string payloadText;
                 //Generate DiscourseHook object for easier reading
-                Console.WriteLine($"Discourse Hook received: {DateTime.Now}");
+                stuffToLog.Add($"Discourse Hook received: {DateTime.Now}");
 
                 Request.Headers.TryGetValue("X-Discourse-Event-Id", out StringValues eventId);
                 Request.Headers.TryGetValue("X-Discourse-Event-Type", out StringValues eventType);
@@ -55,7 +56,7 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-Discourse-Instance", out StringValues discourseUrl);
                 _discourseUrl = discourseUrl;
 
-                Console.WriteLine($"Hook Id: {eventId}");
+                stuffToLog.Add($"Hook Id: {eventId}");
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
@@ -78,28 +79,31 @@ namespace Matterhook.NET.Controllers
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.WriteLine(response != null
+                        stuffToLog.Add(response != null
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
                         return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
                     }
 
-                    Console.WriteLine("Succesfully posted to Mattermost");
+                    stuffToLog.Add("Succesfully posted to Mattermost");
+                    Util.LogList(stuffToLog);
                     return Ok();
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Signature!");
-                    Console.WriteLine($"Expected: {signature}");
-                    Console.WriteLine($"Calculated: {calcSig}");
+                    stuffToLog.Add("Invalid Signature!");
+                    stuffToLog.Add($"Expected: {signature}");
+                    stuffToLog.Add($"Calculated: {calcSig}");
+                    Util.LogList(stuffToLog);
                     return Unauthorized();
                 }
         
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                stuffToLog.Add(e.Message);
+                Util.LogList(stuffToLog);
                 return Content(e.Message);
             }
            

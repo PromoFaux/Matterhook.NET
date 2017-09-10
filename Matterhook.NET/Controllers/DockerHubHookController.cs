@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -33,14 +34,17 @@ namespace Matterhook.NET.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Receive()
         {
+
+            var stuffToLog = new List<string>();
+
             try
             {
                 string payloadText;
                 //Generate DiscourseHook object for easier reading
-                Console.WriteLine($"DockerHub Hook received: {DateTime.Now}");
+                stuffToLog.Add($"DockerHub Hook received: {DateTime.Now}");
 
                 Request.Headers.TryGetValue("X-Request-Id", out StringValues requestId);
-                Console.WriteLine($"Hook Id: {requestId}");
+                stuffToLog.Add($"Hook Id: {requestId}");
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
                     payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
@@ -69,13 +73,16 @@ namespace Matterhook.NET.Controllers
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
+                    stuffToLog.Add("Succesfully posted to Mattermost");
+                    Util.LogList(stuffToLog);
                     return Ok();
                 }
                 return Content("Unable to post to Mattermost");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                stuffToLog.Add(e.Message);
+                Util.LogList(stuffToLog);
                 return Content(e.Message);
             }
         }

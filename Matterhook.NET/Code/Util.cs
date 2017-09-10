@@ -54,6 +54,15 @@ namespace Matterhook.NET.Code
             return builder.ToString();
         }
 
+        public static void LogList(List<string> listToLog)
+        {
+            foreach (var s in listToLog)
+            {
+                Console.WriteLine(s);
+            }
+            Console.WriteLine("");
+        }
+
 
         /// <summary>
         ///     Verifies mattermost config on a per-repo basis. If it's not found, then it's posted to the default settings.

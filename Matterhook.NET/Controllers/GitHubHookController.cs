@@ -38,19 +38,22 @@ namespace Matterhook.NET.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Receive()
         {
+            var stuffToLog = new List<string>();
+
             try
             {
                 string payloadText;
 
                 //Generate GithubHook Object
                 //Generate DiscourseHook object for easier reading
-                Console.WriteLine($"Github Hook received: {DateTime.Now}");
+
+                stuffToLog.Add($"Github Hook received: {DateTime.Now}");
 
                 Request.Headers.TryGetValue("X-GitHub-Event", out StringValues strEvent);
                 Request.Headers.TryGetValue("X-Hub-Signature", out StringValues signature);
                 Request.Headers.TryGetValue("X-GitHub-Delivery", out StringValues delivery);
 
-                Console.WriteLine($"Hook Id: {delivery}");
+                stuffToLog.Add($"Hook Id: {delivery}");
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
@@ -112,26 +115,30 @@ namespace Matterhook.NET.Controllers
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.WriteLine(response != null
+                        stuffToLog.Add(response != null
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
                         return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
                     }
 
-                    Console.WriteLine("Succesfully posted to Mattermost");
+                    stuffToLog.Add("Succesfully posted to Mattermost");
                     return Ok();
                 }
-                Console.WriteLine("Invalid Signature!");
-                Console.WriteLine($"Expected: {signature}");
-                Console.WriteLine($"Calculated: {calcSig}");
+                stuffToLog.Add("Invalid Signature!");
+                stuffToLog.Add($"Expected: {signature}");
+                stuffToLog.Add($"Calculated: {calcSig}");
+                Util.LogList(stuffToLog);
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                stuffToLog.Add(e.Message);
+                Util.LogList(stuffToLog);
                 return Content(e.Message);
             }
+
+
         }
 
         private static MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
