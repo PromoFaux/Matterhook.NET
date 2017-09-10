@@ -54,6 +54,7 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-GitHub-Delivery", out StringValues delivery);
 
                 stuffToLog.Add($"Hook Id: {delivery}");
+                stuffToLog.Add($"X-Github-Event: {strEvent}");
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
@@ -433,9 +434,9 @@ namespace Matterhook.NET.Controllers
                 case "submitted":
                     switch (payload.review.state)
                     {
-                        case "commented":
-                            retVal.Text = $"{userMd} created a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
-                            break;
+                        //case "commented":
+                            //retVal.Text = $"{userMd} created a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                            //break;
                         case "approved":
                             retVal.Text = $"{userMd} [approved]({payload.review.html_url}) {titleMd} in {repoMd}";
                             break;
