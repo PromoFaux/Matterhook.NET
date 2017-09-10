@@ -68,7 +68,7 @@ namespace Matterhook.NET.Controllers
                     var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
 
                     HttpResponseMessage response = null;
-                    MattermostMessage message;
+                    MattermostMessage message = null;
                     switch (githubHook.Event)
                     {
                         case "pull_request":
@@ -112,7 +112,7 @@ namespace Matterhook.NET.Controllers
                             response = await _matterHook.PostAsync(message);
                             break;
                     }
-
+                    
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
                     {
                         stuffToLog.Add(response != null
@@ -121,7 +121,7 @@ namespace Matterhook.NET.Controllers
 
                         return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
                     }
-
+                    if (message != null) stuffToLog.Add(message.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     return Ok();
                 }

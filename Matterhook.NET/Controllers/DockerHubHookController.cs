@@ -69,6 +69,8 @@ namespace Matterhook.NET.Controllers
                     Text = $"New image built and pushed to {repoMd} with tag `{dockerhubHook.payload.PushData.Tag}`"
                 };
 
+                stuffToLog.Add(msg.Text);
+
                 var response = await matterHook.PostAsync(msg);
 
                 if (response.StatusCode == HttpStatusCode.OK)

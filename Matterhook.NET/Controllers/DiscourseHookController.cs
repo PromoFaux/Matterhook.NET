@@ -71,10 +71,11 @@ namespace Matterhook.NET.Controllers
                     var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
                     var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
                     HttpResponseMessage response = null;
-
+                    MattermostMessage message = null;
                     if (discourseHook.EventName == "post_created")
                     {
-                        response = await matterHook.PostAsync(PostCreated((PostPayload) discourseHook.Payload));
+                        message = PostCreated((PostPayload) discourseHook.Payload);
+                        response = await matterHook.PostAsync(message);
                     }
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -85,7 +86,7 @@ namespace Matterhook.NET.Controllers
 
                         return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
                     }
-
+                    if (message != null) stuffToLog.Add(message.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     Util.LogList(stuffToLog);
                     return Ok();
