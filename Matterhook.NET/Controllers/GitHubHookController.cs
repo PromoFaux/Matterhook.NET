@@ -488,6 +488,9 @@ namespace Matterhook.NET.Controllers
                         };
                     }
                     break;
+                case "dismissed":
+                    retVal.Text = $"{userMd} dismissed a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                    break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
             }
