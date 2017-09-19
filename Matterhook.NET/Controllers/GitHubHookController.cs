@@ -163,8 +163,10 @@ namespace Matterhook.NET.Controllers
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
-                    stateEmoji = ":question:";
-                    break;
+                    //This gets annoying!
+                    throw new Exception("Unhandled status state: pending");
+                    //stateEmoji = ":question:";
+                    //break;
                 default:
                     stateEmoji = ":x:";
                     break;
