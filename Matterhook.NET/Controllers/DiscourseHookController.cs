@@ -23,39 +23,44 @@ namespace Matterhook.NET.Controllers
     [Route("[Controller]")]
     public class DiscourseHookController : Controller
     {
-        private const string Sha256Prefix = "sha256=";
         private readonly DiscourseConfig _config;
-        private string DiscourseURL;
+        private string _discourseUrl;
 
 
         public DiscourseHookController(IOptions<Config> config)
         {
-            var c = config ?? throw new ArgumentNullException(nameof(config));
-            _config = c.Value.DiscourseConfig;
-
+            try
+            {
+                _config = config.Value.DiscourseConfig;
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [HttpPost("")]
         public async Task<IActionResult> Receive()
         {
+            var stuffToLog = new List<string>();
             try
             {
                 string payloadText;
                 //Generate DiscourseHook object for easier reading
-                Console.WriteLine($"Discourse Hook received: {DateTime.Now}");
+                stuffToLog.Add($"Discourse Hook received: {DateTime.Now}");
 
                 Request.Headers.TryGetValue("X-Discourse-Event-Id", out StringValues eventId);
                 Request.Headers.TryGetValue("X-Discourse-Event-Type", out StringValues eventType);
                 Request.Headers.TryGetValue("X-Discourse-Event", out StringValues eventName);
                 Request.Headers.TryGetValue("X-Discourse-Event-Signature", out StringValues signature);
                 Request.Headers.TryGetValue("X-Discourse-Instance", out StringValues discourseUrl);
-                DiscourseURL = discourseUrl;
+                _discourseUrl = discourseUrl;
 
-                Console.WriteLine($"Hook Id: {eventId}");
+                stuffToLog.Add($"Hook Id: {eventId}");
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    payloadText = await reader.ReadToEndAsync();
+                    payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha256=");
@@ -66,39 +71,40 @@ namespace Matterhook.NET.Controllers
                     var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
                     var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
                     HttpResponseMessage response = null;
-                    switch (discourseHook.EventName)
+                    MattermostMessage message = null;
+                    if (discourseHook.EventName == "post_created")
                     {
-                        case "post_created":
-                            response = await matterHook.PostAsync(PostCreated((PostPayload)discourseHook.Payload));
-                            break;
-                        default:
-                            break;
+                        message = PostCreated((PostPayload) discourseHook.Payload);
+                        response = await matterHook.PostAsync(message);
                     }
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.WriteLine(response != null
+                        stuffToLog.Add(response != null
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
                         return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
                     }
-
-                    Console.WriteLine("Succesfully posted to Mattermost");
+                    if (message != null) stuffToLog.Add(message.Text);
+                    stuffToLog.Add("Succesfully posted to Mattermost");
+                    Util.LogList(stuffToLog);
                     return Ok();
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Signature!");
-                    Console.WriteLine($"Expected: {signature}");
-                    Console.WriteLine($"Calculated: {calcSig}");
+                    stuffToLog.Add("Invalid Signature!");
+                    stuffToLog.Add($"Expected: {signature}");
+                    stuffToLog.Add($"Calculated: {calcSig}");
+                    Util.LogList(stuffToLog);
                     return Unauthorized();
                 }
         
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                stuffToLog.Add(e.Message);
+                Util.LogList(stuffToLog);
                 return Content(e.Message);
             }
            
@@ -116,7 +122,9 @@ namespace Matterhook.NET.Controllers
             var p = payload.post;
 
             if (_config.IgnoredTopicTitles.Contains(p.topic_title))
+            {
                 throw new Exception("Post title matches ignored titles");
+            }
 
             if (_config.IgnorePrivateMessages)
             {
@@ -125,7 +133,7 @@ namespace Matterhook.NET.Controllers
                 try
                 {
                     JObject.Parse(
-                        new WebClient().DownloadString($"{DiscourseURL}/t/{p.topic_id}.json"));
+                        new WebClient().DownloadString($"{_discourseUrl}/t/{p.topic_id}.json"));
                 }
                 catch
                 {
@@ -148,18 +156,20 @@ namespace Matterhook.NET.Controllers
                     {
                         Fallback = "New Post in Discourse Topic",
                         Title = p.topic_title,
-                        TitleLink = new Uri($"{DiscourseURL}/t/{p.topic_id}/{p.post_number}"),
-                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,DiscourseURL)),
+                        TitleLink = new Uri($"{_discourseUrl}/t/{p.topic_id}/{p.post_number}"),
+                        Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,_discourseUrl)),
                         AuthorName = p.username,
-                        AuthorLink = new Uri($"{DiscourseURL}/u/{p.username}"),
-                        AuthorIcon = new Uri($"{DiscourseURL}{p.avatar_template.Replace("{size}","16")}")
+                        AuthorLink = new Uri($"{_discourseUrl}/u/{p.username}"),
+                        AuthorIcon = new Uri($"{_discourseUrl}{p.avatar_template.Replace("{size}","16")}")
                     }
                 }
 
             };
 
             if (p.post_number.ToString() == "1")
-               retVal.Text = "#NewTopic\n";
+            {
+                retVal.Text = "#NewTopic\n";
+            }
 
             retVal.Text += $"#{p.topic_slug}";
 

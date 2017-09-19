@@ -35,6 +35,9 @@ namespace Matterhook.NET.Webhooks.Github
                 case "delete":
                     Payload = JsonConvert.DeserializeObject<DeleteEvent>(PayloadString);
                     break;
+                case "pull_request_review":
+                    Payload = JsonConvert.DeserializeObject<PullRequestReviewEvent>(PayloadString);
+                    break;
                 case "pull_request_review_comment":
                     Payload = JsonConvert.DeserializeObject<PullRequestReviewCommentEvent>(PayloadString);
                     break;
@@ -43,6 +46,9 @@ namespace Matterhook.NET.Webhooks.Github
                     break;
                 case "commit_comment":
                     Payload = JsonConvert.DeserializeObject<CommitCommentEvent>(PayloadString);
+                    break;
+                case "status":
+                    Payload = JsonConvert.DeserializeObject<StatusEvent>(PayloadString);
                     break;
                 default:
                     throw new Exception($"Unhandled Event Type: {Event}");
