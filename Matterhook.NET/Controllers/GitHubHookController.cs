@@ -172,7 +172,7 @@ namespace Matterhook.NET.Controllers
                     break;
             }
 
-            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n\n>{stateEmoji} - {payload.description}";
+            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
 
             return retVal;
         }
