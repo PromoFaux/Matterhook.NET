@@ -152,14 +152,15 @@ namespace Matterhook.NET.Controllers
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var commitMd = $"[{payload.sha.Substring(0, 7)}]({payload.commit.html_url})";
+            var commitMd = $"[`{payload.sha.Substring(0, 7)}`]({payload.commit.html_url})";
+            var contextMd = $"[`{payload.context}`]({payload.target_url})";
 
-            var stateEmoji = "";
+            string stateEmoji;
 
             switch (payload.state)
             {
                 case "success":
-                    stateEmoji = ":white-check-mark:";
+                    stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
                     stateEmoji = ":question:";
@@ -169,7 +170,7 @@ namespace Matterhook.NET.Controllers
                     break;
             }
 
-            retVal.Text = $"New Status Message from `{payload.context}` on commit `{commitMd}` in {repoMd}\n\n[{stateEmoji} - {payload.description}]({payload.target_url})";
+            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n\n>{stateEmoji} - {payload.description}";
 
             return retVal;
         }
