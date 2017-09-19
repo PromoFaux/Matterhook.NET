@@ -112,6 +112,10 @@ namespace Matterhook.NET.Controllers
                             message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
+                        case "status":
+                            message = GetMessageStatus((StatusEvent)githubHook.Payload);
+                            response = await _matterHook.PostAsync(message);
+                            break;
                     }
                     
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -143,6 +147,33 @@ namespace Matterhook.NET.Controllers
 
         }
 
+        private static MattermostMessage GetMessageStatus(StatusEvent payload)
+        {
+            var retVal = BaseMessageForRepo(payload.repository.full_name);
+
+            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var commitMd = $"[{payload.sha.Substring(0, 7)}]({payload.commit.html_url})";
+
+            var stateEmoji = "";
+
+            switch (payload.state)
+            {
+                case "success":
+                    stateEmoji = ":white-check-mark:";
+                    break;
+                case "pending":
+                    stateEmoji = ":question:";
+                    break;
+                default:
+                    stateEmoji = ":x:";
+                    break;
+            }
+
+            retVal.Text = $"New Status Message from `{payload.context}` on commit `{commitMd}` in {repoMd}\n\n[{stateEmoji} - {payload.description}]({payload.target_url})";
+
+            return retVal;
+        }
+
         private static MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
@@ -151,6 +182,7 @@ namespace Matterhook.NET.Controllers
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var commitMd = $"[`{payload.comment.commit_id.Substring(0, 7)}`]({payload.comment.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+
             if (payload.action == "created")
             {
                 retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";

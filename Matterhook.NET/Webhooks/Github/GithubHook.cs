@@ -47,6 +47,9 @@ namespace Matterhook.NET.Webhooks.Github
                 case "commit_comment":
                     Payload = JsonConvert.DeserializeObject<CommitCommentEvent>(PayloadString);
                     break;
+                case "status":
+                    Payload = JsonConvert.DeserializeObject<StatusEvent>(PayloadString);
+                    break;
                 default:
                     throw new Exception($"Unhandled Event Type: {Event}");
             }

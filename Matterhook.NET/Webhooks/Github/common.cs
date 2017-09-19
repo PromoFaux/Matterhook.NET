@@ -57,6 +57,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class Commit
     {
+        public string html_url;
         public string id { get; set; }
         public string tree_id { get; set; }
         public bool distinct { get; set; }
