@@ -165,8 +165,6 @@ namespace Matterhook.NET.Controllers
                 case "pending":
                     //This gets annoying!
                     throw new Exception("Unhandled status state: pending");
-                    //stateEmoji = ":question:";
-                    //break;
                 default:
                     stateEmoji = ":x:";
                     break;
