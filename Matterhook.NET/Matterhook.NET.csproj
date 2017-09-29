@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Matterhook.NET.MatterhookClient" Version="1.2.11" />
+    <PackageReference Include="Matterhook.NET.MatterhookClient" Version="1.2.1.14" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="ReverseMarkdown" Version="1.1.0" />
