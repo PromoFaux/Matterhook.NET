@@ -163,14 +163,14 @@ namespace Matterhook.NET.Controllers
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
-                    stateEmoji = ":question:";
-                    break;
+                    //This gets annoying!
+                    throw new Exception("Unhandled status state: pending");
                 default:
                     stateEmoji = ":x:";
                     break;
             }
 
-            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n\n>{stateEmoji} - {payload.description}";
+            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
 
             return retVal;
         }
@@ -487,6 +487,9 @@ namespace Matterhook.NET.Controllers
                             Text = payload.review.body,
                         };
                     }
+                    break;
+                case "dismissed":
+                    retVal.Text = $"{userMd} dismissed a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
