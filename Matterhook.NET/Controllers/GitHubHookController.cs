@@ -431,7 +431,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
                     break;
                 case "assigned":
-                    var asignMd = $"[{payload.issue.assignee.login}]({payload.issue.assignee.html_url})";
+                    var asignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
                     break;
                 case "unassigned":
@@ -573,7 +573,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
                     break;
                 case "assigned":
-                    var asignMd = $"[{payload.pull_request.asignee.login}]({payload.pull_request.asignee.html_url})";
+                    var asignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
                     break;
                 case "unassigned":
