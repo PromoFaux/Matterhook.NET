@@ -61,6 +61,10 @@ namespace Matterhook.NET.Controllers
                     payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
+                System.IO.File.WriteAllText($"/config/payloads/{delivery}", $"Signature: {signature}\n");
+                System.IO.File.AppendAllText($"/config/payloads/{delivery}", $"Event: {strEvent}\nPayload:\n");
+                System.IO.File.AppendAllText($"/config/payloads/{delivery}", payloadText);
+
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha1=");
 
 
@@ -226,56 +230,11 @@ namespace Matterhook.NET.Controllers
                         retVal.Text =
                             $"{userMd} pushed {payload.commits.Count} commit{multi} to {branchMd} on {repoMd}";
 
-
-
                         att = new MattermostAttachment();
-                       
-                        var tmpAdded = new MattermostField
-                        {
-                            Short = true,
-                            Title = "Added"
-                        };
-                        var tmpRemoved = new MattermostField
-                        {
-                            Short = true,
-                            Title = "Removed"
-                        };
-                        var tmpModified = new MattermostField
-                        {
-                            Short = true,
-                            Title = "Modified"
-                        };
 
                         foreach (var commit in payload.commits)
                         {
                             att.Text += $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message.Replace("\n"," ")}\n";
-                            if (commit.added.Any())
-                            {
-                                tmpAdded.Value +=
-                                    commit.added.Aggregate("", (current, added) => current + $"`{added}`\n");
-                            }
-
-                            if (commit.removed.Any())
-                            {
-                                tmpRemoved.Value +=
-                                    commit.removed.Aggregate("", (current, removed) => current + $"`{removed}`\n");
-                            }
-
-                            if (commit.modified.Any())
-                            {
-                                tmpModified.Value +=
-                                    commit.modified.Aggregate("", (current, modified) => current + $"`{modified}`\n");
-                            }
-                        }
-
-                        if (_config.VerboseCommitMessages)
-                        {
-                            att.Fields = new List<MattermostField>
-                            {
-                                tmpAdded,
-                                tmpRemoved,
-                                tmpModified
-                            };
                         }
 
                     }
