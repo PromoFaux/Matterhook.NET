@@ -7,7 +7,6 @@ namespace Matterhook.NET
         public DiscourseConfig DiscourseConfig { get; set; }
         public GithubConfig GithubConfig { get; set; }
         public DockerHubConfig DockerHubConfig { get; set; }
-        
     }
 
     public class DiscourseConfig
@@ -39,7 +38,6 @@ namespace Matterhook.NET
     {
         public string RepoName { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
-        
     }
 
     public class DockerHubConfig
