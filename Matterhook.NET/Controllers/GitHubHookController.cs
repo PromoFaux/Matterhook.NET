@@ -424,6 +424,7 @@ namespace Matterhook.NET.Controllers
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var titleMd = $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var reviewerMd = $"[{payload.review.user.login}]({payload.review.user.html_url})";
 
             switch (payload.action)
             {
@@ -452,7 +453,7 @@ namespace Matterhook.NET.Controllers
                     }
                     break;
                 case "dismissed":
-                    retVal.Text = $"{userMd} dismissed a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                    retVal.Text = $"A [review]({payload.review.html_url}) by {reviewerMd} was dismissed on {titleMd} in {repoMd}";
                     break;
                 default:
                     throw new Exception($"Unhandled Event action: {payload.action}");
