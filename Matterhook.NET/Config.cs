@@ -31,8 +31,8 @@ namespace Matterhook.NET
     {
         public string Secret { get; set; }
         public MattermostConfig DefaultMattermostConfig { get; set; }
-        public bool VerboseCommitMessages { get; set; }
         public List<RepoConfig> RepoList { get; set; }
+        public bool DebugSavePayloads { get; set; } = false;
     }
 
     public class RepoConfig

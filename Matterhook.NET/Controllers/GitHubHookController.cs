@@ -61,9 +61,13 @@ namespace Matterhook.NET.Controllers
                     payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
-                System.IO.File.WriteAllText($"/config/payloads/{delivery}", $"Signature: {signature}\n");
-                System.IO.File.AppendAllText($"/config/payloads/{delivery}", $"Event: {strEvent}\nPayload:\n");
-                System.IO.File.AppendAllText($"/config/payloads/{delivery}", payloadText);
+                if (_config.DebugSavePayloads)
+                {
+                    System.IO.File.WriteAllText($"/config/payloads/{delivery}", $"Signature: {signature}\n");
+                    System.IO.File.AppendAllText($"/config/payloads/{delivery}", $"Event: {strEvent}\nPayload:\n");
+                    System.IO.File.AppendAllText($"/config/payloads/{delivery}", payloadText);
+                }
+                
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha1=");
 
