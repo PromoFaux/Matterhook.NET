@@ -334,7 +334,7 @@ namespace Matterhook.NET.Controllers
             if (payload.action == "created")
             {
                 retVal.Text = $"{userMd} commented on issue {titleMd} in {repoMd}";
-                if (!string.IsNullOrEmpty(payload.issue.body))
+                if (!string.IsNullOrEmpty(payload.comment.body))
                 {
                     att = new MattermostAttachment
                     {
