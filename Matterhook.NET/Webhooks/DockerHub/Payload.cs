@@ -66,10 +66,10 @@ namespace Matterhook.NET.Webhooks.DockerHub
         public string Namespace { get; set; }
 
         [JsonProperty(PropertyName = "star_count")]
-        public int StarCount { get; set; }
+        public ulong StarCount { get; set; }
 
         [JsonProperty(PropertyName = "comment_count")]
-        public int CommentCount { get; set; }
+        public ulong CommentCount { get; set; }
 
         [JsonConverter(typeof(UnixDateTimeConverter))]
         [JsonProperty(PropertyName = "date_created")]

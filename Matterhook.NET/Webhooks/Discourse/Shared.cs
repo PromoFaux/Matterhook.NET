@@ -2,8 +2,8 @@
 {
     public class Actions_Summary
     {
-        public int id { get; set; }
-        public int count { get; set; }
+        public ulong id { get; set; }
+        public ulong count { get; set; }
         public bool hidden { get; set; }
         public bool can_act { get; set; }
     }
