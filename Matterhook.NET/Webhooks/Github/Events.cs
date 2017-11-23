@@ -187,7 +187,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class PageBuildEvent : Event //page_build
     {
-        public ulong id { get; set; }
+        public long id { get; set; }
         public Build build { get; set; }
         public Repository repository { get; set; }
         public User sender { get; set; }
@@ -208,12 +208,12 @@ namespace Matterhook.NET.Webhooks.Github
     {
         public string url { get; set; }
         public string column_url { get; set; }
-        public ulong column_id { get; set; }
-        public ulong id { get; set; }
+        public long column_id { get; set; }
+        public long id { get; set; }
         public object note { get; set; }
         public User creator { get; set; }
-        public ulong created_at { get; set; }
-        public ulong updated_at { get; set; }
+        public long created_at { get; set; }
+        public long updated_at { get; set; }
         public string content_url { get; set; }
     }
 
@@ -250,7 +250,7 @@ namespace Matterhook.NET.Webhooks.Github
     public class PullRequestEvent : Event //pull_request
     {
         public string action { get; set; }
-        public ulong number { get; set; }
+        public long number { get; set; }
         public Pull_Request pull_request { get; set; }
         public Repository repository { get; set; }
         public User sender { get; set; }
@@ -326,7 +326,7 @@ namespace Matterhook.NET.Webhooks.Github
 
     public class StatusEvent : Event //status
     {
-        public ulong id { get; set; }
+        public long id { get; set; }
         public string sha { get; set; }
         public string name { get; set; }
         public object target_url { get; set; }
