@@ -69,7 +69,6 @@ namespace Matterhook.NET.Controllers
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
                     payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
-                    Util.LogList(stuffToLog);
                 }
 
                 if (_config.DebugSavePayloads)
