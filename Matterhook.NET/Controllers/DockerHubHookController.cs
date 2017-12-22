@@ -72,19 +72,27 @@ namespace Matterhook.NET.Controllers
 
                 var response = await matterHook.PostAsync(msg);
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response == null || response.StatusCode != HttpStatusCode.OK)
                 {
-                    stuffToLog.Add("Succesfully posted to Mattermost");
-                    Util.LogList(stuffToLog);
-                    return Ok();
+                    stuffToLog.Add(response != null
+                        ? $"Unable to post to Mattermost {response.StatusCode}"
+                        : "Unable to post to Mattermost");
+
+                    return StatusCode(500, response != null
+                        ? $"Problem posting to Mattermost: {response.StatusCode}"
+                        : "Problem Posting to Mattermost");
                 }
-                return Content("Unable to post to Mattermost");
+
+                stuffToLog.Add(msg.Text);
+                stuffToLog.Add("Succesfully posted to Mattermost");
+                Util.LogList(stuffToLog);
+                return StatusCode(200, "Succesfully posted to Mattermost");
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return Content(e.Message);
+                return StatusCode(500,e.Message);
             }
         }
     }

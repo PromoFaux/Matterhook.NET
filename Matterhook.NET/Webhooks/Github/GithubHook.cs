@@ -6,61 +6,56 @@ namespace Matterhook.NET.Webhooks.Github
 {
     public class GithubHook
     {
-        
 
-      public GithubHook(StringValues strEvent, StringValues signature, StringValues delivery, string payloadText)
+
+        public GithubHook(StringValues strEvent, StringValues signature, StringValues delivery, string payloadText)
         {
-            try
-            {
-                Event = strEvent;
-                Signature = signature;
-                Delivery = delivery;
-                PayloadString = payloadText;
 
-                switch (Event)
-                {
-                    case "pull_request":
-                        Payload = JsonConvert.DeserializeObject<PullRequestEvent>(PayloadString);
-                        break;
-                    case "issues":
-                        Payload = JsonConvert.DeserializeObject<IssuesEvent>(PayloadString);
-                        break;
-                    case "issue_comment":
-                        Payload = JsonConvert.DeserializeObject<IssueCommentEvent>(PayloadString);
-                        break;
-                    case "repository":
-                        Payload = JsonConvert.DeserializeObject<RepositoryEvent>(PayloadString);
-                        break;
-                    case "create":
-                        Payload = JsonConvert.DeserializeObject<CreateEvent>(PayloadString);
-                        break;
-                    case "delete":
-                        Payload = JsonConvert.DeserializeObject<DeleteEvent>(PayloadString);
-                        break;
-                    case "pull_request_review":
-                        Payload = JsonConvert.DeserializeObject<PullRequestReviewEvent>(PayloadString);
-                        break;
-                    case "pull_request_review_comment":
-                        Payload = JsonConvert.DeserializeObject<PullRequestReviewCommentEvent>(PayloadString);
-                        break;
-                    case "push":
-                        Payload = JsonConvert.DeserializeObject<PushEvent>(PayloadString);
-                        break;
-                    case "commit_comment":
-                        Payload = JsonConvert.DeserializeObject<CommitCommentEvent>(PayloadString);
-                        break;
-                    case "status":
-                        Payload = JsonConvert.DeserializeObject<StatusEvent>(PayloadString);
-                        break;
-                    default:
-                        throw new Exception($"Unhandled Event Type: {Event}");
-                }
-            }
-            catch (Exception e)
+            Event = strEvent;
+            Signature = signature;
+            Delivery = delivery;
+            PayloadString = payloadText;
+
+            switch (Event)
             {
-                throw new Exception($"Problem Converting payload: {e.Message}");
+                case "pull_request":
+                    Payload = JsonConvert.DeserializeObject<PullRequestEvent>(PayloadString);
+                    break;
+                case "issues":
+                    Payload = JsonConvert.DeserializeObject<IssuesEvent>(PayloadString);
+                    break;
+                case "issue_comment":
+                    Payload = JsonConvert.DeserializeObject<IssueCommentEvent>(PayloadString);
+                    break;
+                case "repository":
+                    Payload = JsonConvert.DeserializeObject<RepositoryEvent>(PayloadString);
+                    break;
+                case "create":
+                    Payload = JsonConvert.DeserializeObject<CreateEvent>(PayloadString);
+                    break;
+                case "delete":
+                    Payload = JsonConvert.DeserializeObject<DeleteEvent>(PayloadString);
+                    break;
+                case "pull_request_review":
+                    Payload = JsonConvert.DeserializeObject<PullRequestReviewEvent>(PayloadString);
+                    break;
+                case "pull_request_review_comment":
+                    Payload = JsonConvert.DeserializeObject<PullRequestReviewCommentEvent>(PayloadString);
+                    break;
+                case "push":
+                    Payload = JsonConvert.DeserializeObject<PushEvent>(PayloadString);
+                    break;
+                case "commit_comment":
+                    Payload = JsonConvert.DeserializeObject<CommitCommentEvent>(PayloadString);
+                    break;
+                case "status":
+                    Payload = JsonConvert.DeserializeObject<StatusEvent>(PayloadString);
+                    break;
+                default:
+                    throw new NotImplementedException($"Event Type: `{Event}` is not implemented. Want it added? Open an issue at https://github.com/promofaux/Matterhook.NET");
             }
-           
+
+
         }
 
         public string Event { get; set; }
@@ -71,7 +66,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string CalcSignature { get; set; }
         public Event Payload { get; set; }
 
-        
+
 
     }
 }

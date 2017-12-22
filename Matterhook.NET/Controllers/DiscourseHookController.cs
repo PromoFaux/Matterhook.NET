@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using ReverseMarkdown;
 using Matterhook.NET.MatterhookClient;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace Matterhook.NET.Controllers
@@ -54,9 +56,20 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-Discourse-Event", out StringValues eventName);
                 Request.Headers.TryGetValue("X-Discourse-Event-Signature", out StringValues signature);
                 Request.Headers.TryGetValue("X-Discourse-Instance", out StringValues discourseUrl);
+                Request.Headers.TryGetValue("Content-type", out var content);
+
                 _discourseUrl = discourseUrl;
 
                 stuffToLog.Add($"Hook Id: {eventId}");
+
+                if (content != "application/json")
+                {
+                    const string error = "Invalid content type. Expected application/json";
+                    stuffToLog.Add(error);
+                    Util.LogList(stuffToLog);
+                    return StatusCode(400, error);
+
+                }
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
@@ -68,13 +81,13 @@ namespace Matterhook.NET.Controllers
 
                 if (signature == calcSig)
                 {
-                    var discourseHook = new DiscourseHook(eventId,eventType,eventName,signature,payloadText);
+                    var discourseHook = new DiscourseHook(eventId, eventType, eventName, signature, payloadText);
                     var matterHook = new MatterhookClient.MatterhookClient(_config.MattermostConfig.WebhookUrl);
                     HttpResponseMessage response = null;
                     MattermostMessage message = null;
                     if (discourseHook.EventName == "post_created")
                     {
-                        message = PostCreated((PostPayload) discourseHook.Payload);
+                        message = PostCreated((PostPayload)discourseHook.Payload);
                         response = await matterHook.PostAsync(message);
                     }
 
@@ -84,30 +97,33 @@ namespace Matterhook.NET.Controllers
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
-                        return Content(response != null ? $"Problem posting to Mattermost: {response.StatusCode}" : "Problem Posting to Mattermost");
+                        return StatusCode(500,response != null
+                            ? $"Problem posting to Mattermost: {response.StatusCode}"
+                            : "Problem Posting to Mattermost");
                     }
+
                     if (message != null) stuffToLog.Add(message.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     Util.LogList(stuffToLog);
-                    return Ok();
+                    return StatusCode(200, "Succesfully posted to Mattermost");
                 }
-                else
-                {
-                    stuffToLog.Add("Invalid Signature!");
-                    stuffToLog.Add($"Expected: {signature}");
-                    stuffToLog.Add($"Calculated: {calcSig}");
-                    Util.LogList(stuffToLog);
-                    return Unauthorized();
-                }
-        
+
+                stuffToLog.Add("Invalid Signature!");
+                stuffToLog.Add($"Expected: {signature}");
+                stuffToLog.Add($"Calculated: {calcSig}");
+                Util.LogList(stuffToLog);
+                return StatusCode(401,"Invalid signature. Please check your secret values in the config and Discourse");
+
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return Content(e.Message);
+                return StatusCode(e is NotImplementedException ? 501 : e is WarningException? 202: 500, e.Message);
             }
-           
+
+
+
         }
 
         private static string ExpandDiscourseUrls(string input, string discourseUrl)
@@ -123,7 +139,8 @@ namespace Matterhook.NET.Controllers
 
             if (_config.IgnoredTopicTitles.Contains(p.topic_title))
             {
-                throw new Exception("Post title matches ignored titles");
+                throw new WarningException("Post title matches an ignored title");
+                
             }
 
             if (_config.IgnorePrivateMessages)
@@ -137,13 +154,13 @@ namespace Matterhook.NET.Controllers
                 }
                 catch
                 {
-                    throw new Exception("Unable to retrieve topic, possibly a PM so we should ignore this.");
+                    throw new WarningException("Unable to retrieve topic, possibly a PM so we should ignore this.");
                 }
             }
 
             if (p.cooked == "")
             {
-                throw new Exception("Body empty, nothing to post.");
+                throw new WarningException("Body empty, nothing to post.");
             }
 
 

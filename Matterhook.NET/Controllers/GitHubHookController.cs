@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -51,13 +52,24 @@ namespace Matterhook.NET.Controllers
                 Request.Headers.TryGetValue("X-GitHub-Event", out var strEvent);
                 Request.Headers.TryGetValue("X-Hub-Signature", out var signature);
                 Request.Headers.TryGetValue("X-GitHub-Delivery", out var delivery);
+                Request.Headers.TryGetValue("Content-type", out var content);
 
                 stuffToLog.Add($"Hook Id: {delivery}");
                 stuffToLog.Add($"X-Github-Event: {strEvent}");
 
+                if (content != "application/json")
+                {
+                    const string error = "Invalid content type. Expected application/json";
+                    stuffToLog.Add(error);
+                    Util.LogList(stuffToLog);
+                    return StatusCode(400, error);
+                    
+                }
+
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
                     payloadText = await reader.ReadToEndAsync().ConfigureAwait(false);
+                    Util.LogList(stuffToLog);
                 }
 
                 if (_config.DebugSavePayloads)
@@ -132,26 +144,26 @@ namespace Matterhook.NET.Controllers
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
-                        return Content(response != null
+                        return StatusCode(500, response != null
                             ? $"Problem posting to Mattermost: {response.StatusCode}"
                             : "Problem Posting to Mattermost");
                     }
                     if (message != null) stuffToLog.Add(message.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     Util.LogList(stuffToLog);
-                    return Ok();
+                    return StatusCode(200, "Succesfully posted to Mattermost");
                 }
                 stuffToLog.Add("Invalid Signature!");
                 stuffToLog.Add($"Expected: {signature}");
                 stuffToLog.Add($"Calculated: {calcSig}");
                 Util.LogList(stuffToLog);
-                return Unauthorized();
+                return StatusCode(401, "Invalid signature. Please check your secret values in the config and on Github.");
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return Content(e.Message);
+                return StatusCode(e is NotImplementedException ? 501 : e is WarningException ? 202 : 500, e.Message);
             }
         }
 
@@ -172,7 +184,7 @@ namespace Matterhook.NET.Controllers
                     break;
                 case "pending":
                     //This gets annoying!
-                    throw new Exception("Unhandled status state: pending");
+                    throw new NotImplementedException("Unhandled Status state: pending");
                 default:
                     stateEmoji = ":x:";
                     break;
@@ -203,7 +215,7 @@ namespace Matterhook.NET.Controllers
             }
             else
             {
-                throw new Exception($"Unhandled Event action: {payload.action}");
+                throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             retVal.Attachments = new List<MattermostAttachment>
@@ -245,7 +257,7 @@ namespace Matterhook.NET.Controllers
                     }
                     else
                     {
-                        throw new Exception("No commits in payload, no need to send message.");
+                        throw new WarningException("No commits in payload, no need to send message.");
                     }
 
                     retVal.Attachments = new List<MattermostAttachment>
@@ -256,7 +268,7 @@ namespace Matterhook.NET.Controllers
                     return retVal;
                 }
 
-            throw new Exception("Unhandled Push type");
+            throw new NotImplementedException($"Unhandled Push Type: {payload._ref}");
         }
 
         private static MattermostMessage GetMessageDelete(DeleteEvent payload)
@@ -275,7 +287,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} deleted tag `{payload._ref}` from {repoMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.ref_type}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
             }
 
             return retVal;
@@ -298,7 +310,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} added tag `{payload._ref}` to {repoMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.ref_type}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
             }
 
             return retVal;
@@ -317,7 +329,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} created new repository {repoMd} in {orgMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             return retVal;
@@ -341,7 +353,7 @@ namespace Matterhook.NET.Controllers
             }
             else
             {
-                throw new Exception($"Unhandled Event action: {payload.action}");
+                throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             if (att != null)
@@ -395,7 +407,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
             if (att != null)
                 retVal.Attachments = new List<MattermostAttachment>
@@ -450,7 +462,7 @@ namespace Matterhook.NET.Controllers
                         $"A [review]({payload.review.html_url}) by {reviewerMd} was dismissed on {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             if (att != null)
@@ -485,7 +497,7 @@ namespace Matterhook.NET.Controllers
 
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             retVal.Attachments = new List<MattermostAttachment>
@@ -536,7 +548,7 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new Exception($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
             }
 
             if (att != null)
