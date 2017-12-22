@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Matterhook.NET.Code;
 using Matterhook.NET.MatterhookClient;
@@ -79,48 +80,48 @@ namespace Matterhook.NET.Controllers
                     switch (githubHook.Event)
                     {
                         case "pull_request":
-                            message = GetMessagePullRequest((PullRequestEvent) githubHook.Payload);
+                            message = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "issues":
-                            message = GetMessageIssues((IssuesEvent) githubHook.Payload);
+                            message = GetMessageIssues((IssuesEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "issue_comment":
-                            message = GetMessageIssueComment((IssueCommentEvent) githubHook.Payload);
+                            message = GetMessageIssueComment((IssueCommentEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "repository":
-                            message = GetMessageRepository((RepositoryEvent) githubHook.Payload);
+                            message = GetMessageRepository((RepositoryEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "create":
-                            message = GetMessageCreate((CreateEvent) githubHook.Payload);
+                            message = GetMessageCreate((CreateEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "delete":
-                            message = GetMessageDelete((DeleteEvent) githubHook.Payload);
+                            message = GetMessageDelete((DeleteEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "pull_request_review":
-                            message = GetMessagePullRequestReview((PullRequestReviewEvent) githubHook.Payload);
+                            message = GetMessagePullRequestReview((PullRequestReviewEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "pull_request_review_comment":
                             message = GetMessagePullRequestReviewComment(
-                                (PullRequestReviewCommentEvent) githubHook.Payload);
+                                (PullRequestReviewCommentEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "push":
-                            message = GetMessagePush((PushEvent) githubHook.Payload);
+                            message = GetMessagePush((PushEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "commit_comment":
-                            message = GetMessageCommitComment((CommitCommentEvent) githubHook.Payload);
+                            message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                         case "status":
-                            message = GetMessageStatus((StatusEvent) githubHook.Payload);
+                            message = GetMessageStatus((StatusEvent)githubHook.Payload);
                             response = await _matterHook.PostAsync(message);
                             break;
                     }
@@ -235,8 +236,12 @@ namespace Matterhook.NET.Controllers
                         att = new MattermostAttachment();
 
                         foreach (var commit in payload.commits)
+                        {
+
+                            var sanitised = Regex.Replace(commit.message, @"\r\n?|\n", " ");
                             att.Text +=
-                                $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {commit.message.Replace("\n", " ")}\n";
+                                $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {sanitised}\n";
+                        }
                     }
                     else
                     {
