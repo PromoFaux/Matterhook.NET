@@ -11,7 +11,7 @@ namespace Matterhook.NET
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath("/config/")
-                .AddJsonFile("config.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("config.json", false, true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
@@ -29,9 +29,7 @@ namespace Matterhook.NET
         public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseMvc();
         }

@@ -32,6 +32,8 @@ Note: Change the listening port in `docker-compose.yml` if you want it to listen
 
 [Example Config file](https://github.com/PromoFaux/Matterhook.NET/blob/master/config/config.json.sample)
 
+In order to cut down on log spam, incoming payloads that are succesfully posted to Mattermost are not written to the console. If you wish to log everything, you can add `"LogOnlyErrors": false` to the desired config section.
+
 ### Discourse Config:
 
 To process Discourse webhooks, point them at `http(s)://<yourdomain>:<port>/DiscourseHook`
@@ -67,8 +69,7 @@ To process Github webhooks, point them at `http(s)://<yourdomain>:<port>/GithubH
 ```
 {  
    "GithubConfig":{  
-      "Secret":"sfsdfdsfsdfsdfsd",
-      "VerboseCommitMessages":  true, 
+      "Secret":"sfsdfdsfsdfsdfsd",      
       "DefaultMattermostConfig": {
         "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
         "Channel": "github-gen",

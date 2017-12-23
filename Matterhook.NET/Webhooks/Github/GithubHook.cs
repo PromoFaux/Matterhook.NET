@@ -6,10 +6,11 @@ namespace Matterhook.NET.Webhooks.Github
 {
     public class GithubHook
     {
-        
 
-      public GithubHook(StringValues strEvent, StringValues signature, StringValues delivery, string payloadText)
+
+        public GithubHook(StringValues strEvent, StringValues signature, StringValues delivery, string payloadText)
         {
+
             Event = strEvent;
             Signature = signature;
             Delivery = delivery;
@@ -51,8 +52,10 @@ namespace Matterhook.NET.Webhooks.Github
                     Payload = JsonConvert.DeserializeObject<StatusEvent>(PayloadString);
                     break;
                 default:
-                    throw new Exception($"Unhandled Event Type: {Event}");
+                    throw new NotImplementedException($"Event Type: `{Event}` is not implemented. Want it added? Open an issue at https://github.com/promofaux/Matterhook.NET");
             }
+
+
         }
 
         public string Event { get; set; }
@@ -63,7 +66,7 @@ namespace Matterhook.NET.Webhooks.Github
         public string CalcSignature { get; set; }
         public Event Payload { get; set; }
 
-        
+
 
     }
 }

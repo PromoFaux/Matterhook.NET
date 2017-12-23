@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,19 +72,31 @@ namespace Matterhook.NET.Controllers
 
                 var response = await matterHook.PostAsync(msg);
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response == null || response.StatusCode != HttpStatusCode.OK)
                 {
+                    stuffToLog.Add(response != null
+                        ? $"Unable to post to Mattermost {response.StatusCode}"
+                        : "Unable to post to Mattermost");
+
+                    return StatusCode(500, response != null
+                        ? $"Unable to post to Mattermost: {response.StatusCode}"
+                        : "Unable to post to Mattermost");
+                }
+
+                if (!_config.LogOnlyErrors)
+                {
+                    stuffToLog.Add(msg.Text);
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     Util.LogList(stuffToLog);
-                    return Ok();
                 }
-                return Content("Unable to post to Mattermost");
+                
+                return StatusCode(200, "Succesfully posted to Mattermost");
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return Content(e.Message);
+                return StatusCode(500,e.Message);
             }
         }
     }

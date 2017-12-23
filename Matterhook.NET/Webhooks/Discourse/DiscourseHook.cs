@@ -32,7 +32,7 @@ namespace Matterhook.NET.Webhooks.Discourse
                     Console.WriteLine("Ping from Discourse!");
                     break;
                 default:
-                    throw new Exception($"Uknown Event Type: {EventType}");
+                    throw new NotImplementedException($"Unhandled Event Type: {EventType}");
 
             }
         }
