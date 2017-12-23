@@ -97,14 +97,18 @@ namespace Matterhook.NET.Controllers
                             ? $"Unable to post to Mattermost {response.StatusCode}"
                             : "Unable to post to Mattermost");
 
-                        return StatusCode(500,response != null
-                            ? $"Problem posting to Mattermost: {response.StatusCode}"
-                            : "Problem Posting to Mattermost");
+                        return StatusCode(500, response != null
+                            ? $"Unable to post to Mattermost: {response.StatusCode}"
+                            : "Unable to post to Mattermost");
                     }
 
-                    if (message != null) stuffToLog.Add(message.Text);
-                    stuffToLog.Add("Succesfully posted to Mattermost");
-                    Util.LogList(stuffToLog);
+                    if (!_config.LogOnlyErrors)
+                    {
+                        if (message != null) stuffToLog.Add(message.Text);
+                        stuffToLog.Add("Succesfully posted to Mattermost");
+                        Util.LogList(stuffToLog);
+                    }
+                    
                     return StatusCode(200, "Succesfully posted to Mattermost");
                 }
 
