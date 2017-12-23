@@ -12,7 +12,6 @@
   },
   "GithubConfig": {
     "Secret": "thisismysecret",
-    "VerboseCommitMessages": false,
     "DefaultMattermostConfig": {
       "WebhookUrl": "https://mattermostever.com/hooks/adasdasdasd",
       "Channel": "atests",
@@ -40,9 +39,10 @@
 
   },
   "DockerHubConfig": {
+    "LogOnlyErrors": false, 
     "DefaultMattermostConfig": {
       "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
-      "Username":  "Docker Hub"
+      "Username": "Docker Hub"
     },
     "RepoList": [
       {
