@@ -16,7 +16,7 @@ namespace Matterhook.NET
         public string[] IgnoredTopicTitles { get; set; }
         public bool IgnorePrivateMessages { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
-        
+
     }
 
     public class MattermostConfig
@@ -36,21 +36,30 @@ namespace Matterhook.NET
         public List<RepoConfig> RepoList { get; set; }
         public bool DebugSavePayloads { get; set; } = false;
     }
-    
+
     public class RepoConfig
     {
         public string RepoName { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
-        //public string[] HookFilter { get; set; }
-        public RepoStatusFilter StatusFilter { get; set; }
+        public Filters Filters { get; set; }
     }
 
-    public class RepoStatusFilter
+    public class Filters
     {
-        public bool EnableSuccess { get; set; } = true;
-        public bool EnablePending { get; set; } = false;
-        public bool EnableFailed { get; set; } = true;
-        public string[] IgnoredStatusProviders { get; set; }
+        public StatusFilter Status { get; set; }
+    }
+
+    public class Filter
+    {
+        public bool WebhookEnabled { get; set; } = true;
+        public string[] IgnoredProviders { get; set; }
+    }
+
+    public class StatusFilter : Filter
+    {
+        public Filter Success { get; set; }
+        public Filter Pending { get; set; } = new Filter { WebhookEnabled = false };
+        public Filter Failed { get; set; }
     }
 
     public class DockerHubConfig

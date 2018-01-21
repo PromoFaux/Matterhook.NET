@@ -64,7 +64,7 @@ namespace Matterhook.NET.Controllers
                     stuffToLog.Add(error);
                     Util.LogList(stuffToLog);
                     return StatusCode(400, error);
-                    
+
                 }
 
                 using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -158,6 +158,7 @@ namespace Matterhook.NET.Controllers
 
                     return StatusCode(200, "Succesfully posted to Mattermost");
                 }
+
                 stuffToLog.Add("Invalid Signature!");
                 stuffToLog.Add($"Expected: {signature}");
                 stuffToLog.Add($"Calculated: {calcSig}");
@@ -167,7 +168,10 @@ namespace Matterhook.NET.Controllers
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
-                Util.LogList(stuffToLog);
+                if (!(e is WarningException) && !(e is NotImplementedException))
+                {
+                    Util.LogList(stuffToLog);
+                }
                 return StatusCode(e is NotImplementedException ? 501 : e is WarningException ? 202 : 500, e.Message);
             }
         }
@@ -176,59 +180,39 @@ namespace Matterhook.NET.Controllers
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
-            var statusFilter = GetRepoStatusFilter(payload.repository.full_name);
+            var filter = GetRepoFilters(payload.repository.full_name);
+
+            if (!filter.Status.WebhookEnabled) throw new WarningException("Status Webhooks disabled by Matterhook Config");
 
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var commitMd = $"[`{payload.sha.Substring(0, 7)}`]({payload.commit.html_url})";
             var contextMd = $"[`{payload.context}`]({payload.target_url})";
-            
+
             string stateEmoji;
 
             switch (payload.state)
             {
                 case "success":
-                    if (statusFilter.EnableSuccess)
-                    {
-                        stateEmoji = ":white_check_mark:";
-                    }
-                    else
-                    {
-                        throw new WarningException("Success statuses ignored by Matterhook config");
-                    }
+                    if (!filter.Status.Success.WebhookEnabled) throw new WarningException("Success statuses ignored by Matterhook config");
+                    if (filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
+
+                    stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
-                    if (statusFilter.EnablePending)
-                    {
-                        stateEmoji = ":question:";
-                    }
-                    else
-                    {
-                        throw new WarningException("Pending statuses ignored by Matterhook config");
-                    }
+                    if (!filter.Status.Pending.WebhookEnabled) throw new WarningException("Pending statuses ignored by Matterhook config");
+                    if (filter.Status.Pending.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Pending statuses from {payload.context} ignored by Matterhook Config");
+
+                    stateEmoji = ":question:";
                     break;
                 default:
-                    if (statusFilter.EnableFailed)
-                    {
-                        stateEmoji = ":x:";
-                    }
-                    else
-                    {
-                        throw new WarningException("Error statuses ignored by Matterhook config");
-                    }
+                    if (!filter.Status.Failed.WebhookEnabled) throw new WarningException("Failed statuses ignored by Matterhook config");
+                    if (filter.Status.Failed.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Failed statuses from {payload.context} ignored by Matterhook Config");
+
+                    stateEmoji = ":x:";
                     break;
             }
 
-
-            if (!statusFilter.IgnoredStatusProviders.Contains(contextMd))
-            {
-                retVal.Text =
-                    $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
-            }
-            else
-            {
-                throw new WarningException($"Status provider: {contextMd} ignored by Matterhook config");
-            }
-            
+            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
 
             return retVal;
         }
@@ -615,11 +599,11 @@ namespace Matterhook.NET.Controllers
         }
 
 
-        private static RepoStatusFilter GetRepoStatusFilter(string repoName)
+        private static Filters GetRepoFilters(string repoName)
         {
-            var test = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
+            var filters = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
 
-            return test == null ? new RepoStatusFilter() : test.StatusFilter;
+            return filters == null ? new Filters() : filters.Filters;
         }
     }
 }
