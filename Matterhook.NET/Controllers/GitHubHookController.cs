@@ -29,7 +29,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 _config = config.Value.GithubConfig;
-
+                
             }
             catch (ArgumentException e)
             {
@@ -194,20 +194,23 @@ namespace Matterhook.NET.Controllers
             switch (payload.state)
             {
                 case "success":
+                    
+
                     if (!filter.Status.Success.WebhookEnabled) throw new WarningException("Success statuses ignored by Matterhook config");
-                    if (filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
+
+                    if (filter.Status.Success.IgnoredProviders !=null && filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
 
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
                     if (!filter.Status.Pending.WebhookEnabled) throw new WarningException("Pending statuses ignored by Matterhook config");
-                    if (filter.Status.Pending.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Pending statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Pending.IgnoredProviders != null && filter.Status.Pending.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Pending statuses from {payload.context} ignored by Matterhook Config");
 
                     stateEmoji = ":question:";
                     break;
                 default:
                     if (!filter.Status.Failed.WebhookEnabled) throw new WarningException("Failed statuses ignored by Matterhook config");
-                    if (filter.Status.Failed.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Failed statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Failed.IgnoredProviders != null && filter.Status.Failed.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Failed statuses from {payload.context} ignored by Matterhook Config");
 
                     stateEmoji = ":x:";
                     break;

@@ -75,9 +75,9 @@ namespace Matterhook.NET
 
     public class StatusFilter : Filter
     {
-        public Filter Success { get; set; }
+        public Filter Success { get; set; } = new Filter { WebhookEnabled = true };
         public Filter Pending { get; set; } = new Filter { WebhookEnabled = false };
-        public Filter Failed { get; set; }
+        public Filter Failed { get; set; } = new Filter { WebhookEnabled = true };
     }
 
     public class DockerHubConfig
