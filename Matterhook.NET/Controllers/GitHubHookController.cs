@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -175,27 +176,59 @@ namespace Matterhook.NET.Controllers
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
 
+            var statusFilter = GetRepoStatusFilter(payload.repository.full_name);
+
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var commitMd = $"[`{payload.sha.Substring(0, 7)}`]({payload.commit.html_url})";
             var contextMd = $"[`{payload.context}`]({payload.target_url})";
-
+            
             string stateEmoji;
 
             switch (payload.state)
             {
                 case "success":
-                    stateEmoji = ":white_check_mark:";
+                    if (statusFilter.EnableSuccess)
+                    {
+                        stateEmoji = ":white_check_mark:";
+                    }
+                    else
+                    {
+                        throw new WarningException("Success statuses ignored by Matterhook config");
+                    }
                     break;
                 case "pending":
-                    //This gets annoying!
-                    throw new NotImplementedException("Unhandled Status state: pending");
+                    if (statusFilter.EnablePending)
+                    {
+                        stateEmoji = ":question:";
+                    }
+                    else
+                    {
+                        throw new WarningException("Pending statuses ignored by Matterhook config");
+                    }
+                    break;
                 default:
-                    stateEmoji = ":x:";
+                    if (statusFilter.EnableFailed)
+                    {
+                        stateEmoji = ":x:";
+                    }
+                    else
+                    {
+                        throw new WarningException("Error statuses ignored by Matterhook config");
+                    }
                     break;
             }
 
-            retVal.Text =
-                $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
+
+            if (!statusFilter.IgnoredStatusProviders.Contains(contextMd))
+            {
+                retVal.Text =
+                    $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
+            }
+            else
+            {
+                throw new WarningException($"Status provider: {contextMd} ignored by Matterhook config");
+            }
+            
 
             return retVal;
         }
@@ -579,6 +612,14 @@ namespace Matterhook.NET.Controllers
             };
 
             return retVal;
+        }
+
+
+        private static RepoStatusFilter GetRepoStatusFilter(string repoName)
+        {
+            var test = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
+
+            return test == null ? new RepoStatusFilter() : test.StatusFilter;
         }
     }
 }

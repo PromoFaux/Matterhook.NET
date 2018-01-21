@@ -36,11 +36,21 @@ namespace Matterhook.NET
         public List<RepoConfig> RepoList { get; set; }
         public bool DebugSavePayloads { get; set; } = false;
     }
-
+    
     public class RepoConfig
     {
         public string RepoName { get; set; }
         public MattermostConfig MattermostConfig { get; set; }
+        //public string[] HookFilter { get; set; }
+        public RepoStatusFilter StatusFilter { get; set; }
+    }
+
+    public class RepoStatusFilter
+    {
+        public bool EnableSuccess { get; set; } = true;
+        public bool EnablePending { get; set; } = false;
+        public bool EnableFailed { get; set; } = true;
+        public string[] IgnoredStatusProviders { get; set; }
     }
 
     public class DockerHubConfig
