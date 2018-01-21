@@ -29,6 +29,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 _config = config.Value.GithubConfig;
+
             }
             catch (ArgumentException e)
             {

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Matterhook.NET
 {
@@ -7,6 +10,21 @@ namespace Matterhook.NET
         public DiscourseConfig DiscourseConfig { get; set; }
         public GithubConfig GithubConfig { get; set; }
         public DockerHubConfig DockerHubConfig { get; set; }
+
+        public void Save(string path)
+        {
+            // serialize JSON directly to a file
+            using (var file = File.CreateText(path))
+            {
+                var serializer = new JsonSerializer { Formatting = Formatting.Indented };
+                serializer.Serialize(file, this);
+            }
+        }
+
+        internal void Save()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class DiscourseConfig
@@ -46,7 +64,7 @@ namespace Matterhook.NET
 
     public class Filters
     {
-        public StatusFilter Status { get; set; }
+        public StatusFilter Status { get; set; } = new StatusFilter();
     }
 
     public class Filter
