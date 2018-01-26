@@ -605,9 +605,9 @@ namespace Matterhook.NET.Controllers
 
         private static Filters GetRepoFilters(string repoName)
         {
-            var filters = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
+            var repo = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
 
-            return filters == null ? new Filters() : filters.Filters;
+            return repo.Filters == null ? new Filters() : repo.Filters;
         }
     }
 }
