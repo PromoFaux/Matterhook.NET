@@ -13,5 +13,5 @@ services:
     - PUID=0
     - PGID=0
     build:
-      context: ./Matterhook.NET
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Matterhook.NET/Dockerfile
