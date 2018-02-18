@@ -8,13 +8,14 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GithubWebhook;
 using Matterhook.NET.Code;
 using Matterhook.NET.MatterhookClient;
-using Matterhook.NET.Webhooks.Github;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using GithubWebhook.Events;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 
 namespace Matterhook.NET.Controllers
 {
@@ -29,7 +30,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 _config = config.Value.GithubConfig;
-                
+
             }
             catch (ArgumentException e)
             {
@@ -83,60 +84,61 @@ namespace Matterhook.NET.Controllers
 
                 var calcSig = Util.CalculateSignature(payloadText, signature, _config.Secret, "sha1=");
 
+                var hook = new GhWebhook(Request);
 
-                if (signature == calcSig)
+                if (hook.SignatureValid(_config.Secret))
                 {
-                    var githubHook = new GithubHook(strEvent, signature, delivery, payloadText);
-
                     HttpResponseMessage response = null;
                     MattermostMessage message = null;
-                    switch (githubHook.Event)
+                    switch (hook.Event)
                     {
-                        case "pull_request":
-                            message = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
+                        case PullRequestEvent.EventString:
+                            message = GetMessagePullRequest((PullRequestEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "issues":
-                            message = GetMessageIssues((IssuesEvent)githubHook.Payload);
+                        case IssuesEvent.EventString:
+                            message = GetMessageIssues((IssuesEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "issue_comment":
-                            message = GetMessageIssueComment((IssueCommentEvent)githubHook.Payload);
+                        case IssueCommentEvent.EventString:
+                            message = GetMessageIssueComment((IssueCommentEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "repository":
-                            message = GetMessageRepository((RepositoryEvent)githubHook.Payload);
+                        case RepositoryEvent.EventString:
+                            message = GetMessageRepository((RepositoryEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "create":
-                            message = GetMessageCreate((CreateEvent)githubHook.Payload);
+                        case CreateEvent.EventString:
+                            message = GetMessageCreate((CreateEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "delete":
-                            message = GetMessageDelete((DeleteEvent)githubHook.Payload);
+                        case DeleteEvent.EventString:
+                            message = GetMessageDelete((DeleteEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "pull_request_review":
-                            message = GetMessagePullRequestReview((PullRequestReviewEvent)githubHook.Payload);
+                        case PullRequestReviewEvent.EventString:
+                            message = GetMessagePullRequestReview((PullRequestReviewEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "pull_request_review_comment":
+                        case PullRequestReviewCommentEvent.EventString:
                             message = GetMessagePullRequestReviewComment(
-                                (PullRequestReviewCommentEvent)githubHook.Payload);
+                                (PullRequestReviewCommentEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "push":
-                            message = GetMessagePush((PushEvent)githubHook.Payload);
+                        case PushEvent.EventString:
+                            message = GetMessagePush((PushEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "commit_comment":
-                            message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
+                        case CommitCommentEvent.EventString:
+                            message = GetMessageCommitComment((CommitCommentEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
-                        case "status":
-                            message = GetMessageStatus((StatusEvent)githubHook.Payload);
+                        case StatusEvent.EventString:
+                            message = GetMessageStatus((StatusEvent)hook.PayloadObject);
                             response = await _matterHook.PostAsync(message);
                             break;
+                        case PingEvent.EventString:
+                            return StatusCode(200, "Pong!");
                     }
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -162,9 +164,10 @@ namespace Matterhook.NET.Controllers
 
                 stuffToLog.Add("Invalid Signature!");
                 stuffToLog.Add($"Expected: {signature}");
-                stuffToLog.Add($"Calculated: {calcSig}");
+                stuffToLog.Add($"Calculated: {hook.GetExpectedSignature(_config.Secret)}");
                 Util.LogList(stuffToLog);
                 return StatusCode(401, "Invalid signature. Please check your secret values in the config and on Github.");
+
             }
             catch (Exception e)
             {
@@ -179,68 +182,68 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessageStatus(StatusEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
 
-            var filter = GetRepoFilters(payload.repository.full_name);
+            var filter = GetRepoFilters(payload.Repository.FullName);
 
             if (!filter.Status.WebhookEnabled) throw new WarningException("Status Webhooks disabled by Matterhook Config");
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var commitMd = $"[`{payload.sha.Substring(0, 7)}`]({payload.commit.html_url})";
-            var contextMd = $"[`{payload.context}`]({payload.target_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var commitMd = $"[`{payload.Sha.Substring(0, 7)}`]({payload.Commit.HtmlUrl})";
+            var contextMd = $"[`{payload.Context}`]({payload.TargetUrl})";
 
             string stateEmoji;
 
-            switch (payload.state)
+            switch (payload.State)
             {
                 case "success":
-                    
+
 
                     if (!filter.Status.Success.WebhookEnabled) throw new WarningException("Success statuses ignored by Matterhook config");
 
-                    if (filter.Status.Success.IgnoredProviders !=null && filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Success.IgnoredProviders != null && filter.Status.Success.IgnoredProviders.Contains(payload.Context)) throw new WarningException($"Success statuses from {payload.Context} ignored by Matterhook Config");
 
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
                     if (!filter.Status.Pending.WebhookEnabled) throw new WarningException("Pending statuses ignored by Matterhook config");
-                    if (filter.Status.Pending.IgnoredProviders != null && filter.Status.Pending.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Pending statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Pending.IgnoredProviders != null && filter.Status.Pending.IgnoredProviders.Contains(payload.Context)) throw new WarningException($"Pending statuses from {payload.Context} ignored by Matterhook Config");
 
                     stateEmoji = ":question:";
                     break;
                 default:
                     if (!filter.Status.Failed.WebhookEnabled) throw new WarningException("Failed statuses ignored by Matterhook config");
-                    if (filter.Status.Failed.IgnoredProviders != null && filter.Status.Failed.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Failed statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Failed.IgnoredProviders != null && filter.Status.Failed.IgnoredProviders.Contains(payload.Context)) throw new WarningException($"Failed statuses from {payload.Context} ignored by Matterhook Config");
 
                     stateEmoji = ":x:";
                     break;
             }
 
-            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.description}";
+            retVal.Text = $"New Status Message from {contextMd} on commit {commitMd} in {repoMd}\n>{stateEmoji} - {payload.Description}";
 
             return retVal;
         }
 
         private static MattermostMessage GetMessageCommitComment(CommitCommentEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
             MattermostAttachment att = null;
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var commitMd = $"[`{payload.comment.commit_id.Substring(0, 7)}`]({payload.comment.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var commitMd = $"[`{payload.Comment.CommitId.Substring(0, 7)}`]({payload.Comment.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
 
-            if (payload.action == "created")
+            if (payload.Action == "created")
             {
                 retVal.Text = $"{userMd} commented on {commitMd} in {repoMd}";
                 att = new MattermostAttachment
                 {
-                    Text = payload.comment.body
+                    Text = payload.Comment.Body
                 };
             }
             else
             {
-                throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             retVal.Attachments = new List<MattermostAttachment>
@@ -253,31 +256,31 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessagePush(PushEvent payload)
         {
-            if (!payload.deleted && !payload.forced)
-                if (!payload._ref.StartsWith("refs/tags/"))
+            if (payload.Deleted != null && payload.Forced != null && !(bool)payload.Deleted && !(bool)payload.Forced)
+                if (!payload.Ref.StartsWith("refs/tags/"))
                 {
-                    var retVal = BaseMessageForRepo(payload.repository.full_name);
+                    var retVal = BaseMessageForRepo(payload.Repository.FullName);
                     MattermostAttachment att = null;
 
 
-                    if (payload.commits.Count > 0)
+                    if (payload.Commits.Length > 0)
                     {
-                        var multi = payload.commits.Count > 1 ? "s" : "";
-                        var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-                        var branch = payload._ref.Replace("refs/heads/", "");
-                        var branchMd = $"[{branch}]({payload.repository.html_url}/tree/{branch})";
-                        var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+                        var multi = payload.Commits.Length > 1 ? "s" : "";
+                        var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+                        var branch = payload.Ref.Replace("refs/heads/", "");
+                        var branchMd = $"[{branch}]({payload.Repository.HtmlUrl}/tree/{branch})";
+                        var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
                         retVal.Text =
-                            $"{userMd} pushed {payload.commits.Count} commit{multi} to {branchMd} on {repoMd}";
+                            $"{userMd} pushed {payload.Commits.Length} commit{multi} to {branchMd} on {repoMd}";
 
                         att = new MattermostAttachment();
 
-                        foreach (var commit in payload.commits)
+                        foreach (var commit in payload.Commits)
                         {
 
-                            var sanitised = Regex.Replace(commit.message, @"\r\n?|\n", " ");
+                            var sanitised = Regex.Replace(commit.Message, @"\r\n?|\n", " ");
                             att.Text +=
-                                $"- [`{commit.id.Substring(0, 8)}`]({commit.url}) - {sanitised}\n";
+                                $"- [`{commit.Id.Substring(0, 8)}`]({commit.Url}) - {sanitised}\n";
                         }
                     }
                     else
@@ -293,26 +296,26 @@ namespace Matterhook.NET.Controllers
                     return retVal;
                 }
 
-            throw new NotImplementedException($"Unhandled Push Type: {payload._ref}");
+            throw new NotImplementedException($"Unhandled Push Type: {payload.Ref}");
         }
 
         private static MattermostMessage GetMessageDelete(DeleteEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
 
-            switch (payload.ref_type)
+            switch (payload.RefType)
             {
                 case "branch":
-                    retVal.Text = $"{userMd} deleted branch `{payload._ref}` from {repoMd}";
+                    retVal.Text = $"{userMd} deleted branch `{payload.Ref}` from {repoMd}";
                     break;
                 case "tag":
-                    retVal.Text = $"{userMd} deleted tag `{payload._ref}` from {repoMd}";
+                    retVal.Text = $"{userMd} deleted tag `{payload.Ref}` from {repoMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.RefType}");
             }
 
             return retVal;
@@ -321,21 +324,21 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessageCreate(CreateEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
 
-            switch (payload.ref_type)
+            switch (payload.RefType)
             {
                 case "branch":
-                    retVal.Text = $"{userMd} added branch `{payload._ref}` to {repoMd}";
+                    retVal.Text = $"{userMd} added branch `{payload.Ref}` to {repoMd}";
                     break;
                 case "tag":
-                    retVal.Text = $"{userMd} added tag `{payload._ref}` to {repoMd}";
+                    retVal.Text = $"{userMd} added tag `{payload.Ref}` to {repoMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.RefType}");
             }
 
             return retVal;
@@ -343,18 +346,18 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessageRepository(RepositoryEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
 
-            var repoMd = $"[{payload.repository.name}]({payload.repository.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            var orgMd = $"[{payload.organization.login}]({payload.organization.url})";
-            switch (payload.action)
+            var repoMd = $"[{payload.Repository.Name}]({payload.Repository.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+            var orgMd = $"[{payload.Organization.Login}]({payload.Organization.Url})";
+            switch (payload.Action)
             {
                 case "created":
                     retVal.Text = $"{userMd} created new repository {repoMd} in {orgMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             return retVal;
@@ -362,23 +365,23 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
             MattermostAttachment att = null;
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            if (payload.action == "created")
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var titleMd = $"[#{payload.Issue.Number} {payload.Issue.Title}]({payload.Issue.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+            if (payload.Action == "created")
             {
                 retVal.Text = $"{userMd} commented on issue {titleMd} in {repoMd}";
-                if (!string.IsNullOrEmpty(payload.comment.body))
+                if (!string.IsNullOrEmpty(payload.Comment.Body))
                     att = new MattermostAttachment
                     {
-                        Text = payload.comment.body
+                        Text = payload.Comment.Body
                     };
             }
             else
             {
-                throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             if (att != null)
@@ -392,23 +395,23 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessageIssues(IssuesEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
 
             MattermostAttachment att = null;
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var titleMd = $"[#{payload.issue.number} {payload.issue.title}]({payload.issue.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            switch (payload.action)
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var titleMd = $"[#{payload.Issue.Number} {payload.Issue.Title}]({payload.Issue.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+            switch (payload.Action)
             {
                 case "opened":
-                    retVal.Text = $"{userMd} opened a [new issue]({payload.issue.html_url}) in {repoMd}";
-                    if (!string.IsNullOrEmpty(payload.issue.body))
+                    retVal.Text = $"{userMd} opened a [new issue]({payload.Issue.HtmlUrl}) in {repoMd}";
+                    if (!string.IsNullOrEmpty(payload.Issue.Body))
                         att = new MattermostAttachment
                         {
-                            Title = $"#{payload.issue.number} {payload.issue.title}",
-                            TitleLink = new Uri(payload.issue.html_url),
-                            Text = payload.issue.body
+                            Title = $"#{payload.Issue.Number} {payload.Issue.Title}",
+                            TitleLink = new Uri(payload.Issue.HtmlUrl),
+                            Text = payload.Issue.Body
                         };
                     break;
                 case "closed":
@@ -418,21 +421,21 @@ namespace Matterhook.NET.Controllers
                     retVal.Text = $"{userMd} reopened issue {titleMd} in {repoMd}";
                     break;
                 case "labeled":
-                    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
+                    //retVal.Text = $"{userMd} added label: `{payload.Issue.Labels[0].Name}` to {titleMd} in {repoMd}";
                     break;
                 case "unlabeled":
-                    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
+                    //retVal.Text = $"{userMd} removed label: `{payload.Label.Name}` from {titleMd} in {repoMd}";
                     break;
                 case "assigned":
-                    var asignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    var asignMd = $"[{payload.Issue.Assignee.Login}]({payload.Issue.Assignee.HtmlUrl})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
                     break;
                 case "unassigned":
-                    var unasignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    var unasignMd = $"[{payload.Issue.Assignee.Login}]({payload.Issue.Assignee.HtmlUrl})";
                     retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
             if (att != null)
                 retVal.Attachments = new List<MattermostAttachment>
@@ -446,48 +449,48 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessagePullRequestReview(PullRequestReviewEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
             MattermostAttachment att = null;
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
             var titleMd =
-                $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            var reviewerMd = $"[{payload.review.user.login}]({payload.review.user.html_url})";
+                $"[#{payload.PullRequest.Number} {payload.PullRequest.Title}]({payload.PullRequest.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+            var reviewerMd = $"[{payload.Review.User.Login}]({payload.Review.User.HtmlUrl})";
 
-            switch (payload.action)
+            switch (payload.Action)
             {
                 case "submitted":
-                    switch (payload.review.state)
+                    switch (payload.Review.State)
                     {
                         //case "commented":
-                        //retVal.Text = $"{userMd} created a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                        //retVal.Text = $"{userMd} created a [review]({payload.Review.HtmlUrl}) on {titleMd} in {repoMd}";
                         //break;
                         case "approved":
-                            retVal.Text = $"{userMd} [approved]({payload.review.html_url}) {titleMd} in {repoMd}";
+                            retVal.Text = $"{userMd} [approved]({payload.Review.HtmlUrl}) {titleMd} in {repoMd}";
                             break;
                         case "changes_requested":
                             retVal.Text =
-                                $"{userMd} [requested changes]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                                $"{userMd} [requested changes]({payload.Review.HtmlUrl}) on {titleMd} in {repoMd}";
                             break;
                         default:
                             retVal.Text =
-                                $"{userMd} submitted a [review]({payload.review.html_url}) on {titleMd} in {repoMd}";
+                                $"{userMd} submitted a [review]({payload.Review.HtmlUrl}) on {titleMd} in {repoMd}";
                             break;
                     }
 
-                    if (!string.IsNullOrEmpty(payload.review.body))
+                    if (!string.IsNullOrEmpty(payload.Review.Body))
                         att = new MattermostAttachment
                         {
-                            Text = payload.review.body
+                            Text = payload.Review.Body
                         };
                     break;
                 case "dismissed":
                     retVal.Text =
-                        $"A [review]({payload.review.html_url}) by {reviewerMd} was dismissed on {titleMd} in {repoMd}";
+                        $"A [review]({payload.Review.HtmlUrl}) by {reviewerMd} was dismissed on {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             if (att != null)
@@ -502,27 +505,27 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessagePullRequestReviewComment(PullRequestReviewCommentEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
             MattermostAttachment att = null;
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
-            var commitMd = $"[`{payload.comment.commit_id.Substring(0, 7)}`]({payload.comment.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
+            var commitMd = $"[`{payload.Comment.CommitId.Substring(0, 7)}`]({payload.Comment.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
             var titleMd =
-                $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.html_url})";
+                $"[#{payload.PullRequest.Number} {payload.PullRequest.Title}]({payload.PullRequest.HtmlUrl})";
 
-            switch (payload.action)
+            switch (payload.Action)
             {
                 case "created":
                     retVal.Text = $"{userMd} commented on {titleMd}:{commitMd}  in {repoMd}";
                     att = new MattermostAttachment
                     {
-                        Text = payload.comment.body
+                        Text = payload.Comment.Body
                     };
 
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             retVal.Attachments = new List<MattermostAttachment>
@@ -535,45 +538,45 @@ namespace Matterhook.NET.Controllers
 
         private static MattermostMessage GetMessagePullRequest(PullRequestEvent payload)
         {
-            var retVal = BaseMessageForRepo(payload.repository.full_name);
+            var retVal = BaseMessageForRepo(payload.Repository.FullName);
             MattermostAttachment att = null;
 
-            var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
+            var repoMd = $"[{payload.Repository.FullName}]({payload.Repository.HtmlUrl})";
             var titleMd =
-                $"[#{payload.pull_request.number} {payload.pull_request.title}]({payload.pull_request.html_url})";
-            var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-            switch (payload.action)
+                $"[#{payload.PullRequest.Number} {payload.PullRequest.Title}]({payload.PullRequest.HtmlUrl})";
+            var userMd = $"[{payload.Sender.Login}]({payload.Sender.HtmlUrl})";
+            switch (payload.Action)
             {
                 case "opened":
-                    retVal.Text = $"{userMd} opened a [new pull request]({payload.pull_request.html_url}) in {repoMd}";
+                    retVal.Text = $"{userMd} opened a [new pull request]({payload.PullRequest.HtmlUrl}) in {repoMd}";
 
-                    if (!string.IsNullOrEmpty(payload.pull_request.body))
+                    if (!string.IsNullOrEmpty(payload.PullRequest.Body))
                         att = new MattermostAttachment
                         {
-                            Title = $"#{payload.pull_request.number} {payload.pull_request.title}",
-                            TitleLink = new Uri(payload.pull_request.html_url),
-                            Text = payload.pull_request.body
+                            Title = $"#{payload.PullRequest.Number} {payload.PullRequest.Title}",
+                            TitleLink = new Uri(payload.PullRequest.HtmlUrl),
+                            Text = payload.PullRequest.Body
                         };
                     break;
                 case "labeled":
-                    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
+                    //retVal.Text = $"{userMd} added label: `{payload.Label.Name}` to {titleMd} in {repoMd}";
                     break;
                 case "unlabeled":
-                    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
+                    //retVal.Text = $"{userMd} removed label: `{payload.Label.Name}` from {titleMd} in {repoMd}";
                     break;
                 case "closed":
                     retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
                     break;
                 case "assigned":
-                    var asignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    var asignMd = $"[{payload.PullRequest.Assignee.Login}]({payload.PullRequest.Assignee.HtmlUrl})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
                     break;
                 case "unassigned":
-                    var unasignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
+                    var unasignMd = $"[{payload.PullRequest.Assignee.Login}]({payload.PullRequest.Assignee.HtmlUrl})";
                     retVal.Text = $"{userMd} unassigned {unasignMd} from {titleMd} in {repoMd}";
                     break;
                 default:
-                    throw new NotImplementedException($"Unhandled Event action: {payload.action}");
+                    throw new NotImplementedException($"Unhandled Event action: {payload.Action}");
             }
 
             if (att != null)
