@@ -29,7 +29,6 @@ namespace Matterhook.NET
 
     public class DiscourseConfig
     {
-        public bool LogOnlyErrors { get; set; } = true;
         public string Secret { get; set; }
         public string[] IgnoredTopicTitles { get; set; }
         public bool IgnorePrivateMessages { get; set; }
@@ -48,7 +47,6 @@ namespace Matterhook.NET
     //TODO: Look at configuring subscribed events
     public class GithubConfig
     {
-        public bool LogOnlyErrors { get; set; } = true;
         public string Secret { get; set; }
         public MattermostConfig DefaultMattermostConfig { get; set; }
         public List<RepoConfig> RepoList { get; set; }
@@ -82,7 +80,6 @@ namespace Matterhook.NET
 
     public class DockerHubConfig
     {
-        public bool LogOnlyErrors { get; set; } = true;
         public MattermostConfig DefaultMattermostConfig { get; set; }
         public List<RepoConfig> RepoList { get; set; }
     }

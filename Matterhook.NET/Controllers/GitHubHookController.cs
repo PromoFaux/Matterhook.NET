@@ -14,7 +14,7 @@ using Matterhook.NET.MatterhookClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using GithubWebhook.Events;
-
+using Microsoft.Extensions.Logging;
 
 
 namespace Matterhook.NET.Controllers
@@ -24,9 +24,12 @@ namespace Matterhook.NET.Controllers
     {
         private static GithubConfig _config;
         private static MatterhookClient.MatterhookClient _matterHook;
+        private readonly ILogger _logger;
 
-        public GithubHookController(IOptions<Config> config)
+        public GithubHookController(IOptions<Config> config, ILoggerFactory logger)
         {
+            _logger = logger.CreateLogger("Matterhook.NET.Controllers.GithubHookController");
+
             try
             {
                 _config = config.Value.GithubConfig;
@@ -41,30 +44,26 @@ namespace Matterhook.NET.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Receive()
         {
-            var stuffToLog = new List<string>();
-
+            var stuffToLog = "";
             try
             {
                 string payloadText;
-
-                //Generate GithubHook Object
-                //Generate DiscourseHook object for easier reading
-
-                stuffToLog.Add($"Github Hook received: {DateTime.Now}");
+                
+                stuffToLog += $"Github Hook received: {DateTime.Now}";
 
                 Request.Headers.TryGetValue("X-GitHub-Event", out var strEvent);
                 Request.Headers.TryGetValue("X-Hub-Signature", out var signature);
                 Request.Headers.TryGetValue("X-GitHub-Delivery", out var delivery);
                 Request.Headers.TryGetValue("Content-type", out var content);
 
-                stuffToLog.Add($"Hook Id: {delivery}");
-                stuffToLog.Add($"X-Github-Event: {strEvent}");
+                stuffToLog += $"\nHook Id: {delivery}";
+                stuffToLog += $"\nX-Github-Event: {strEvent}";
 
                 if (content != "application/json")
                 {
-                    const string error = "Invalid content type. Expected application/json";
-                    stuffToLog.Add(error);
-                    Util.LogList(stuffToLog);
+                    const string error = "\nInvalid content type. Expected application/json";
+                    stuffToLog += error;
+                    _logger.LogCritical(stuffToLog);
                     return StatusCode(400, error);
 
                 }
@@ -143,38 +142,38 @@ namespace Matterhook.NET.Controllers
 
                     if (response == null || response.StatusCode != HttpStatusCode.OK)
                     {
-                        stuffToLog.Add(response != null
-                            ? $"Unable to post to Mattermost {response.StatusCode}"
-                            : "Unable to post to Mattermost");
+                        stuffToLog += response != null
+                            ? $"\nUnable to post to Mattermost {response.StatusCode}"
+                            : "\nUnable to post to Mattermost";
 
                         return StatusCode(500, response != null
                             ? $"Unable to post to Mattermost: {response.StatusCode}"
                             : "Unable to post to Mattermost");
                     }
 
-                    if (!_config.LogOnlyErrors)
-                    {
-                        if (message != null) stuffToLog.Add(message.Text);
-                        stuffToLog.Add("Succesfully posted to Mattermost");
-                        Util.LogList(stuffToLog);
-                    }
+
+                    if (message != null) stuffToLog += message.Text;
+                    stuffToLog += "\nSuccesfully posted to Mattermost";
+
+                    _logger.LogInformation(stuffToLog);
+
 
                     return StatusCode(200, "Succesfully posted to Mattermost");
                 }
 
-                stuffToLog.Add("Invalid Signature!");
-                stuffToLog.Add($"Expected: {signature}");
-                stuffToLog.Add($"Calculated: {hook.GetExpectedSignature(_config.Secret)}");
-                Util.LogList(stuffToLog);
+                stuffToLog += ("\nInvalid Signature!");
+                stuffToLog += ($"\nExpected: {signature}");
+                stuffToLog += ($"\nCalculated: {hook.GetExpectedSignature(_config.Secret)}");
+                _logger.LogWarning(stuffToLog);
                 return StatusCode(401, "Invalid signature. Please check your secret values in the config and on Github.");
 
             }
             catch (Exception e)
             {
-                stuffToLog.Add(e.Message);
+                stuffToLog += ($"\n{e.Message}");
                 if (!(e is WarningException) && !(e is NotImplementedException))
                 {
-                    Util.LogList(stuffToLog);
+                    _logger.LogWarning(stuffToLog);
                 }
                 return StatusCode(e is NotImplementedException ? 501 : e is WarningException ? 202 : 500, e.Message);
             }

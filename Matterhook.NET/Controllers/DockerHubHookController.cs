@@ -51,7 +51,7 @@ namespace Matterhook.NET.Controllers
 
                 //No fancy checksumming on this hook. I'll keep an eye on it in future...
                 var dockerhubHook = new DockerHubHook(payloadText);
-                
+
                 var mm = Util.GetMattermostDetails(_config.DefaultMattermostConfig,
                     _config.RepoList, dockerhubHook.payload.Repository.RepoName);
 
@@ -59,7 +59,7 @@ namespace Matterhook.NET.Controllers
 
                 var reponame = dockerhubHook.payload.Repository.RepoName;
                 var repoMd = $"[{reponame}]({dockerhubHook.payload.Repository.RepoUrl})";
-                
+
                 var msg = new MattermostMessage
                 {
                     Channel = mm.Channel,
@@ -83,20 +83,19 @@ namespace Matterhook.NET.Controllers
                         : "Unable to post to Mattermost");
                 }
 
-                if (!_config.LogOnlyErrors)
-                {
-                    stuffToLog.Add(msg.Text);
-                    stuffToLog.Add("Succesfully posted to Mattermost");
-                    Util.LogList(stuffToLog);
-                }
-                
+
+                stuffToLog.Add(msg.Text);
+                stuffToLog.Add("Succesfully posted to Mattermost");
+                Util.LogList(stuffToLog);
+
+
                 return StatusCode(200, "Succesfully posted to Mattermost");
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return StatusCode(500,e.Message);
+                return StatusCode(500, e.Message);
             }
         }
     }
