@@ -417,12 +417,12 @@ namespace Matterhook.NET.Controllers
                 case "reopened":
                     retVal.Text = $"{userMd} reopened issue {titleMd} in {repoMd}";
                     break;
-                case "labeled":
-                    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
-                    break;
-                case "unlabeled":
-                    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
-                    break;
+                //case "labeled":
+                //    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
+                //    break;
+                //case "unlabeled":
+                //    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
+                //    break;
                 case "assigned":
                     var asignMd = $"[{payload.assignee.login}]({payload.assignee.html_url})";
                     retVal.Text = $"{userMd} assigned {asignMd} to {titleMd} in {repoMd}";
@@ -555,12 +555,12 @@ namespace Matterhook.NET.Controllers
                             Text = payload.pull_request.body
                         };
                     break;
-                case "labeled":
-                    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
-                    break;
-                case "unlabeled":
-                    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
-                    break;
+                //case "labeled":
+                //    retVal.Text = $"{userMd} added label: `{payload.label.name}` to {titleMd} in {repoMd}";
+                //    break;
+                //case "unlabeled":
+                //    retVal.Text = $"{userMd} removed label: `{payload.label.name}` from {titleMd} in {repoMd}";
+                //    break;
                 case "closed":
                     retVal.Text = $"{userMd} closed pull request {titleMd} in {repoMd}";
                     break;
