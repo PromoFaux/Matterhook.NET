@@ -3,14 +3,13 @@ services:
   - docker
 
 before_install:
-  - if [ "$TRAVIS_BRANCH" == "development" ]; then
-    docker build -f Matterhook.NET/Dockerfile -t promofaux/matterhook.net:development .;
-    fi
+  - docker build -f Matterhook.NET/Dockerfile -t promofaux/matterhook.net .    
 script:
-  - docker images promofaux/matterhook.net:development
+  - docker images promofaux/matterhook.net
   
 after_success:
   - if [ "$TRAVIS_BRANCH" == "development" ]; then
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker tag promofaux/matterhook.net promofaux/matterhook.net:development;
     docker push promofaux/matterhook.net:development;
     fi
