@@ -7,11 +7,10 @@ before_install:
     docker build -f Matterhook.NET/Dockerfile -t promofaux/matterhook.net:development .;
     fi
 script:
-  - docker images promofaux/matterhook.net
+  - docker images promofaux/matterhook.net:development
   
 after_success:
   - if [ "$TRAVIS_BRANCH" == "development" ]; then
     docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker tag development promofaux/matterhook.net;
-    docker push promofaux/matterhook.net;
+    docker push promofaux/matterhook.net:development;
     fi
