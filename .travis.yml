@@ -3,7 +3,9 @@ services:
   - docker
 
 before_install:
-  - docker build -t promofaux/matterhook.net ./Matterhook.Net/Dockerfile
+  - if [ "$TRAVIS_BRANCH" == "development" ]; then
+    docker build -f Matterhook.NET/Dockerfile -t promofaux/matterhook.net:development .
+    fi
 script:
   - docker images promofaux/matterhook.net
   
