@@ -1,0 +1,15 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t Matterhook.NET/Dockerfile .
+script:
+  - docker images Matterhook.NET/Dockerfile
+  
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "development" ]; then
+    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker tag development promofaux/matterhook.net;
+    docker push promofaux/matterhook.net;
+    fi
