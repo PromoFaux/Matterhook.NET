@@ -43,6 +43,7 @@ namespace Matterhook.NET
         public string Channel { get; set; }
         public string Username { get; set; }
         public string IconUrl { get; set; }
+        public int MessageLength { get; set; } = 3800;
     }
 
     //TODO: Look at configuring subscribed events
