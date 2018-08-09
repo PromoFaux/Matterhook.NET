@@ -94,48 +94,48 @@ namespace Matterhook.NET.Controllers
                     {
                         case "pull_request":
                             message = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message,_config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "issues":
                             message = GetMessageIssues((IssuesEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "issue_comment":
                             message = GetMessageIssueComment((IssueCommentEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "repository":
                             message = GetMessageRepository((RepositoryEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "create":
                             message = GetMessageCreate((CreateEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "delete":
                             message = GetMessageDelete((DeleteEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "pull_request_review":
                             message = GetMessagePullRequestReview((PullRequestReviewEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "pull_request_review_comment":
                             message = GetMessagePullRequestReviewComment(
                                 (PullRequestReviewCommentEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "push":
                             message = GetMessagePush((PushEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "commit_comment":
                             message = GetMessageCommitComment((CommitCommentEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "status":
                             message = GetMessageStatus((StatusEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                     }
 
@@ -194,12 +194,8 @@ namespace Matterhook.NET.Controllers
             switch (payload.state)
             {
                 case "success":
-                    
-
                     if (!filter.Status.Success.WebhookEnabled) throw new WarningException("Success statuses ignored by Matterhook config");
-
                     if (filter.Status.Success.IgnoredProviders !=null && filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
-
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
@@ -211,7 +207,6 @@ namespace Matterhook.NET.Controllers
                 default:
                     if (!filter.Status.Failed.WebhookEnabled) throw new WarningException("Failed statuses ignored by Matterhook config");
                     if (filter.Status.Failed.IgnoredProviders != null && filter.Status.Failed.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Failed statuses from {payload.context} ignored by Matterhook Config");
-
                     stateEmoji = ":x:";
                     break;
             }
@@ -607,7 +602,7 @@ namespace Matterhook.NET.Controllers
         {
             var repo = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
 
-            return repo.Filters == null ? new Filters() : repo.Filters;
+            return repo.Filters ?? new Filters();
         }
     }
 }
