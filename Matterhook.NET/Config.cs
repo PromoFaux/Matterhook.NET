@@ -7,7 +7,6 @@ namespace Matterhook.NET
 {
     public class Config
     {
-        public DiscourseConfig DiscourseConfig { get; set; }
         public GithubConfig GithubConfig { get; set; }
         public DockerHubConfig DockerHubConfig { get; set; }
 
@@ -25,17 +24,7 @@ namespace Matterhook.NET
         {
             throw new NotImplementedException();
         }
-    }
-
-    public class DiscourseConfig
-    {
-        public bool LogOnlyErrors { get; set; } = true;
-        public string Secret { get; set; }
-        public string[] IgnoredTopicTitles { get; set; }
-        public bool IgnorePrivateMessages { get; set; }
-        public MattermostConfig MattermostConfig { get; set; }
-
-    }
+    }    
 
     public class MattermostConfig
     {

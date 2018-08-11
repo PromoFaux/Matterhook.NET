@@ -36,32 +36,7 @@ In order to cut down on log spam, incoming payloads that are succesfully posted 
 
 ### Discourse Config:
 
-To process Discourse webhooks, point them at `http(s)://<yourdomain>:<port>/DiscourseHook`
-
-```JSON
-{
-  "DiscourseConfig": {    
-    "Secret": "mysecretpassword1",
-    "IgnoredTopicTitles": [ "Welcome!", "Backup completed successfully" ],
-    "IgnorePrivateMessages": true,
-    "MattermostConfig": {
-      "WebhookUrl": "https://mattermostserver.com/hooks/asdasdasd",
-      "Channel": "atests",
-      "Username": "Adam's Test Bot",
-      "IconUrl": "https://avatars1.githubusercontent.com/u/3220138"
-    }
-}
-```
-
-
-![](https://i.imgur.com/CIkgbpA.png)
-
-#### Message types handled:
-
-- :white_check_mark: `post_created`
-- :x: Everything Else
-
-There are a few more topic types that I will get around to adding eventually, for now though, I only need the `post_created` ones.
+This has now been removed, and it is suggested you use the (superior!) [discourse-chat-integration](https://meta.discourse.org/t/chatroom-integration-plugin-discourse-chat-integration/66522)
 
 ### Github Config:
 
@@ -164,7 +139,7 @@ To Process Docker Hub Webhooks, point them at `http(s)://<yourdomain>:<port>/Doc
 ![](https://i.imgur.com/BMkHD9h.png)
 
 ## Future plans /todos:
-- Process more of the Github events. Feel free to help out with that one, at this stage it's just a typing excersise!
+- Sort out the github webhook objects
 - MOAR WEBHOOKS.
 
 ## Attributions:
