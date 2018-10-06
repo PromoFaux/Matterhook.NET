@@ -171,7 +171,7 @@ namespace Matterhook.NET.Controllers
             var retVal = new MattermostMessage
             {
                 Channel = _config.MattermostConfig.Channel,
-                IconUrl = new Uri(_config.MattermostConfig.IconUrl),
+                IconUrl = _config.MattermostConfig.IconUrl,
                 Username = _config.MattermostConfig.Username,
 
 
@@ -181,11 +181,11 @@ namespace Matterhook.NET.Controllers
                     {
                         Fallback = "New Post in Discourse Topic",
                         Title = p.topic_title,
-                        TitleLink = new Uri($"{_discourseUrl}/t/{p.topic_id}/{p.post_number}"),
+                        TitleLink = $"{_discourseUrl}/t/{p.topic_id}/{p.post_number}",
                         Text = new Converter().Convert(ExpandDiscourseUrls(p.cooked,_discourseUrl)),
                         AuthorName = p.username,
-                        AuthorLink = new Uri($"{_discourseUrl}/u/{p.username}"),
-                        AuthorIcon = new Uri($"{_discourseUrl}{p.avatar_template.Replace("{size}","16")}")
+                        AuthorLink = $"{_discourseUrl}/u/{p.username}",
+                        AuthorIcon = $"{_discourseUrl}{p.avatar_template.Replace("{size}","16")}"
                     }
                 }
 

@@ -402,7 +402,7 @@ namespace Matterhook.NET.Controllers
                         att = new MattermostAttachment
                         {
                             Title = $"#{payload.issue.number} {payload.issue.title}",
-                            TitleLink = new Uri(payload.issue.html_url),
+                            TitleLink = payload.issue.html_url,
                             Text = payload.issue.body
                         };
                     break;
@@ -546,7 +546,7 @@ namespace Matterhook.NET.Controllers
                         att = new MattermostAttachment
                         {
                             Title = $"#{payload.pull_request.number} {payload.pull_request.title}",
-                            TitleLink = new Uri(payload.pull_request.html_url),
+                            TitleLink = payload.pull_request.html_url,
                             Text = payload.pull_request.body
                         };
                     break;
@@ -591,7 +591,7 @@ namespace Matterhook.NET.Controllers
             {
                 Channel = mmc.Channel,
                 Username = mmc.Username,
-                IconUrl = mmc.IconUrl != null ? new Uri(mmc.IconUrl) : null
+                IconUrl = mmc.IconUrl != null ? mmc.IconUrl : null
             };
 
             return retVal;
