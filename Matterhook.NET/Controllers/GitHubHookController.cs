@@ -321,13 +321,15 @@ namespace Matterhook.NET.Controllers
             var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
             var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
 
+            var refMd = $"[{payload._ref}]({payload.repository.html_url}/tree/{payload._ref})";
+
             switch (payload.ref_type)
             {
                 case "branch":
-                    retVal.Text = $"{userMd} added branch `{payload._ref}` to {repoMd}";
+                    retVal.Text = $"{userMd} added branch `{refMd}` to {repoMd}";
                     break;
                 case "tag":
-                    retVal.Text = $"{userMd} added tag `{payload._ref}` to {repoMd}";
+                    retVal.Text = $"{userMd} added tag `{refMd}` to {repoMd}";
                     break;
                 default:
                     throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
@@ -355,7 +357,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private static MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
+        private static MattermostMessage GetMessageIssue`ment(IssueCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
