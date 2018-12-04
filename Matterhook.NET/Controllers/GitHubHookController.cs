@@ -326,10 +326,10 @@ namespace Matterhook.NET.Controllers
             switch (payload.ref_type)
             {
                 case "branch":
-                    retVal.Text = $"{userMd} added branch `{refMd}` to {repoMd}";
+                    retVal.Text = $"{userMd} added branch {refMd} to {repoMd}";
                     break;
                 case "tag":
-                    retVal.Text = $"{userMd} added tag `{refMd}` to {repoMd}";
+                    retVal.Text = $"{userMd} added tag {refMd} to {repoMd}";
                     break;
                 default:
                     throw new NotImplementedException($"Unhandled Event action: {payload.ref_type}");
