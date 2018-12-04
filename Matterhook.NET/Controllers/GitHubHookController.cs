@@ -357,7 +357,7 @@ namespace Matterhook.NET.Controllers
             return retVal;
         }
 
-        private static MattermostMessage GetMessageIssuement(IssueCommentEvent payload)
+        private static MattermostMessage GetMessageIssueComment(IssueCommentEvent payload)
         {
             var retVal = BaseMessageForRepo(payload.repository.full_name);
             MattermostAttachment att = null;
