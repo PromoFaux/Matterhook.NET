@@ -257,9 +257,16 @@ namespace Matterhook.NET.Controllers
 
                     if (payload.commits.Count > 0)
                     {
+                        var branch = payload._ref.Replace("refs/heads/", "");
+
+                        // Check if this branch is ignored
+                        if(_config.IgnoredBranchPushes.Contains(branch))
+                        {
+                            throw new WarningException("Branch of pushed commit matches an ignored branch");
+                        }
+
                         var multi = payload.commits.Count > 1 ? "s" : "";
                         var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-                        var branch = payload._ref.Replace("refs/heads/", "");
                         var branchMd = $"[{branch}]({payload.repository.html_url}/tree/{branch})";
                         var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
                         retVal.Text =
