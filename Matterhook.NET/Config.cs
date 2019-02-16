@@ -54,7 +54,6 @@ namespace Matterhook.NET
         public MattermostConfig DefaultMattermostConfig { get; set; }
         public List<RepoConfig> RepoList { get; set; }
         public bool DebugSavePayloads { get; set; } = false;
-        public string[] IgnoredBranchPushes { get; set; }
     }
 
     public class RepoConfig
@@ -67,6 +66,7 @@ namespace Matterhook.NET
     public class Filters
     {
         public StatusFilter Status { get; set; } = new StatusFilter();
+        public string[] IgnoredBranchPushes { get; set; }
     }
 
     public class Filter

@@ -29,7 +29,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 _config = config.Value.GithubConfig;
-                
+
             }
             catch (ArgumentException e)
             {
@@ -257,10 +257,11 @@ namespace Matterhook.NET.Controllers
 
                     if (payload.commits.Count > 0)
                     {
+                        var filters = GetRepoFilters(payload.repository.full_name);
                         var branch = payload._ref.Replace("refs/heads/", "");
 
                         // Check if this branch is ignored
-                        if(_config.IgnoredBranchPushes.Contains(branch))
+                        if(filters.IgnoredBranchPushes.Contains(branch))
                         {
                             throw new WarningException("Branch of pushed commit matches an ignored branch");
                         }
