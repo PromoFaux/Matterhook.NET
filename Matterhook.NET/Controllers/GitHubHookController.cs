@@ -258,12 +258,20 @@ namespace Matterhook.NET.Controllers
                     MattermostAttachment att = null;
 
                     var filter = GetRepoFilters(payload.repository.full_name);
+                    var branch = payload._ref.Replace("refs/heads/", "");
+
+                    if (filter.IgnoredBranchFilter != null)
+                    {
+                        if (filter.IgnoredBranchFilter.Contains(branch))
+                        {
+                            throw new WarningException($"Branch: {branch} is Ignored by filter.");
+                        }
+                    }
 
                     if (payload.commits.Count > 0)
                     {
                         var multi = payload.commits.Count > 1 ? "s" : "";
-                        var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";
-                        var branch = payload._ref.Replace("refs/heads/", "");
+                        var userMd = $"[{payload.sender.login}]({payload.sender.html_url})";                        
                         var branchMd = $"[{branch}]({payload.repository.html_url}/tree/{branch})";
                         var repoMd = $"[{payload.repository.full_name}]({payload.repository.html_url})";
                         retVal.Text =
