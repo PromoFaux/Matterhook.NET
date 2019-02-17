@@ -13,8 +13,9 @@ using Matterhook.NET.Webhooks.DockerHub;
 
 namespace Matterhook.NET.Controllers
 {
-    [Route("[Controller]")]
-    public class DockerHubHookController : Controller
+    [Route("[controller]")]
+    [ApiController]
+    public class DockerHubHookController : ControllerBase
     {
         private readonly DockerHubConfig _config;
 
@@ -30,8 +31,8 @@ namespace Matterhook.NET.Controllers
             }
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> Receive()
+        [HttpPost]
+        public async Task<IActionResult> Post()
         {
 
             var stuffToLog = new List<string>();
@@ -51,7 +52,7 @@ namespace Matterhook.NET.Controllers
 
                 //No fancy checksumming on this hook. I'll keep an eye on it in future...
                 var dockerhubHook = new DockerHubHook(payloadText);
-                
+
                 var mm = Util.GetMattermostDetails(_config.DefaultMattermostConfig,
                     _config.RepoList, dockerhubHook.payload.Repository.RepoName);
 
@@ -59,7 +60,7 @@ namespace Matterhook.NET.Controllers
 
                 var reponame = dockerhubHook.payload.Repository.RepoName;
                 var repoMd = $"[{reponame}]({dockerhubHook.payload.Repository.RepoUrl})";
-                
+
                 var msg = new MattermostMessage
                 {
                     Channel = mm.Channel,
@@ -89,14 +90,14 @@ namespace Matterhook.NET.Controllers
                     stuffToLog.Add("Succesfully posted to Mattermost");
                     Util.LogList(stuffToLog);
                 }
-                
+
                 return StatusCode(200, "Succesfully posted to Mattermost");
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return StatusCode(500,e.Message);
+                return StatusCode(500, e.Message);
             }
         }
     }

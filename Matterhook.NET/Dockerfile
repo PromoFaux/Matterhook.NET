@@ -1,19 +1,18 @@
-﻿FROM microsoft/aspnetcore:2.0 AS base
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
 WORKDIR /app
-ENV ASPNETCORE_URLS=http://+:8080
-EXPOSE 8080
+EXPOSE 80
+EXPOSE 443
 
-FROM microsoft/aspnetcore-build:2.0 AS build
+FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY *.sln ./
-COPY Matterhook.NET/Matterhook.NET.csproj Matterhook.NET/
-RUN dotnet restore
+COPY ["Matterhook.NET/Matterhook.NET.csproj", "Matterhook.NET/"]
+RUN dotnet restore "Matterhook.NET/Matterhook.NET.csproj"
 COPY . .
-WORKDIR /src/Matterhook.NET
-RUN dotnet build -c Release -o /app
+WORKDIR "/src/Matterhook.NET"
+RUN dotnet build "Matterhook.NET.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish "Matterhook.NET.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app

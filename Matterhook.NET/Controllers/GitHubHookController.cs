@@ -18,9 +18,11 @@ using Microsoft.Extensions.Options;
 
 namespace Matterhook.NET.Controllers
 {
-    [Route("[Controller]")]
-    public class GithubHookController : Controller
+    [Route("[controller]")]
+    [ApiController]
+    public class GithubHookController : ControllerBase
     {
+
         private static GithubConfig _config;
         private static MatterhookClient.MatterhookClient _matterHook;
 
@@ -29,7 +31,7 @@ namespace Matterhook.NET.Controllers
             try
             {
                 _config = config.Value.GithubConfig;
-                
+
             }
             catch (ArgumentException e)
             {
@@ -37,8 +39,9 @@ namespace Matterhook.NET.Controllers
             }
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> Receive()
+        
+        [HttpPost]            
+        public async Task<IActionResult> Post()
         {
             var stuffToLog = new List<string>();
 
@@ -94,7 +97,7 @@ namespace Matterhook.NET.Controllers
                     {
                         case "pull_request":
                             message = GetMessagePullRequest((PullRequestEvent)githubHook.Payload);
-                            response = await _matterHook.PostAsync(message,_config.DefaultMattermostConfig.MessageLength);
+                            response = await _matterHook.PostAsync(message, _config.DefaultMattermostConfig.MessageLength);
                             break;
                         case "issues":
                             message = GetMessageIssues((IssuesEvent)githubHook.Payload);
@@ -195,7 +198,7 @@ namespace Matterhook.NET.Controllers
             {
                 case "success":
                     if (!filter.Status.Success.WebhookEnabled) throw new WarningException("Success statuses ignored by Matterhook config");
-                    if (filter.Status.Success.IgnoredProviders !=null && filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
+                    if (filter.Status.Success.IgnoredProviders != null && filter.Status.Success.IgnoredProviders.Contains(payload.context)) throw new WarningException($"Success statuses from {payload.context} ignored by Matterhook Config");
                     stateEmoji = ":white_check_mark:";
                     break;
                 case "pending":
