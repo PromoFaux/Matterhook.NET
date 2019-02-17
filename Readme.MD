@@ -3,7 +3,7 @@ Listen for Webhooks and post them to your Mattermost server!
 
 Consume webhooks from all around the web (currently just Github and Discourse) and post them to your favourite Mattermost incoming Webhook
 
-[![Docker Build Status](https://img.shields.io/docker/build/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/builds/) [![Docker Stars](https://img.shields.io/docker/stars/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) [![Docker Pulls](https://img.shields.io/docker/pulls/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) 
+[![Docker Stars](https://img.shields.io/docker/stars/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) [![Docker Pulls](https://img.shields.io/docker/pulls/promofaux/matterhook.net.svg)](https://hub.docker.com/r/promofaux/matterhook.net/) 
 
 ## Deployment
 Recommended - Use pre-built container:
