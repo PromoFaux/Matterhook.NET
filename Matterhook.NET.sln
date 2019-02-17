@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matterhook.NET", "Matterhook.NET\Matterhook.NET.csproj", "{6F4E0C58-A4BC-4D09-9E04-86635EBF560B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Matterhook.NET", "Matterhook.NET\Matterhook.NET.csproj", "{6F4E0C58-A4BC-4D09-9E04-86635EBF560B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution files", "solution files", "{6FD98B73-E5F4-48A4-A4F6-7FD996EC5D10}"
+	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
