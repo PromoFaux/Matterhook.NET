@@ -66,6 +66,7 @@ namespace Matterhook.NET
     public class Filters
     {
         public StatusFilter Status { get; set; } = new StatusFilter();
+        public string[] IgnoredBranchFilter { get; set; }
     }
 
     public class Filter

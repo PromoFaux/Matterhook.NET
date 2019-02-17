@@ -257,6 +257,7 @@ namespace Matterhook.NET.Controllers
                     var retVal = BaseMessageForRepo(payload.repository.full_name);
                     MattermostAttachment att = null;
 
+                    var filter = GetRepoFilters(payload.repository.full_name);
 
                     if (payload.commits.Count > 0)
                     {
@@ -605,7 +606,7 @@ namespace Matterhook.NET.Controllers
 
         private static Filters GetRepoFilters(string repoName)
         {
-            var repo = _config.RepoList.FirstOrDefault(x => x.RepoName == repoName);
+            var repo = _config.RepoList.FirstOrDefault(x => x.RepoName.ToUpper() == repoName.ToUpper());
 
             return repo.Filters ?? new Filters();
         }
