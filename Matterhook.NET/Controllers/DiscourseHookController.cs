@@ -22,8 +22,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Matterhook.NET.Controllers
 {
-    [Route("[Controller]")]
-    public class DiscourseHookController : Controller
+    [Route("[controller]")]
+    [ApiController]
+    public class DiscourseHookController : ControllerBase
     {
         private readonly DiscourseConfig _config;
         private string _discourseUrl;
@@ -108,7 +109,7 @@ namespace Matterhook.NET.Controllers
                         stuffToLog.Add("Succesfully posted to Mattermost");
                         Util.LogList(stuffToLog);
                     }
-                    
+
                     return StatusCode(200, "Succesfully posted to Mattermost");
                 }
 
@@ -116,14 +117,14 @@ namespace Matterhook.NET.Controllers
                 stuffToLog.Add($"Expected: {signature}");
                 stuffToLog.Add($"Calculated: {calcSig}");
                 Util.LogList(stuffToLog);
-                return StatusCode(401,"Invalid signature. Please check your secret values in the config and Discourse");
+                return StatusCode(401, "Invalid signature. Please check your secret values in the config and Discourse");
 
             }
             catch (Exception e)
             {
                 stuffToLog.Add(e.Message);
                 Util.LogList(stuffToLog);
-                return StatusCode(e is NotImplementedException ? 501 : e is WarningException? 202: 500, e.Message);
+                return StatusCode(e is NotImplementedException ? 501 : e is WarningException ? 202 : 500, e.Message);
             }
 
 
@@ -144,7 +145,7 @@ namespace Matterhook.NET.Controllers
             if (_config.IgnoredTopicTitles.Contains(p.topic_title))
             {
                 throw new WarningException("Post title matches an ignored title");
-                
+
             }
 
             if (_config.IgnorePrivateMessages)
